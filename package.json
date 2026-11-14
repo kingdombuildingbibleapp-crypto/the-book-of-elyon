@@ -1,0 +1,9 @@
+{
+  "name": "the-book-of-elyon",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@netlify/blobs": "^11.1.9"
+  }
+}

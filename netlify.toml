@@ -2,6 +2,11 @@
   command = "python3 build.py"
   publish = "public"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["public/data/index.json"]
+
 [[headers]]
   for = "/data/*"
   [headers.values]

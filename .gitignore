@@ -1,3 +1,5 @@
 public/data/
 __pycache__/
 intros/
+node_modules/
+.netlify/

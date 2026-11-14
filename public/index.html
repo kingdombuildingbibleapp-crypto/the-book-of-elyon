@@ -92,6 +92,50 @@ body.on-cover nav,body.on-cover #menu{display:none}
 .turn a{color:var(--accent);text-decoration:none}
 .folio{font:italic 16px "EB Garamond",serif;color:var(--muted)}
 @media (max-width:760px){.toc2{grid-template-columns:1fr}.ctitle{font-size:40px}.frame{padding:36px 22px}.reftab .rn{display:none}}
+.v{cursor:pointer;border-radius:4px;-webkit-tap-highlight-color:transparent}
+.v.flash{background:var(--accent-soft);transition:background .3s}
+.v.sel{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent-soft)}
+.hint{font:12px Inter,sans-serif;color:var(--muted);margin:-6px 0 14px}
+#ask-btn{border:1px solid var(--accent);background:var(--accent);color:var(--panel);border-radius:8px;padding:6px 12px;font:500 15px Inter,sans-serif;cursor:pointer}
+.drawer{position:fixed;top:57px;right:0;bottom:0;width:min(440px,100%);background:var(--panel);border-left:1px solid var(--line);box-shadow:-8px 0 24px rgba(0,0,0,.08);z-index:20;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .22s ease}
+.drawer.open{transform:none}
+.dhead{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dhead h3{flex:1;margin:0;font:600 20px "EB Garamond",serif}
+.dhead .x{border:0;background:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px 8px}
+.dbody{flex:1;overflow-y:auto;padding:16px}
+.dbody p{margin:0 0 12px}
+.ins .ref{font:600 13px Inter,sans-serif;color:var(--accent);margin-bottom:6px}
+.ins blockquote{margin:0 0 16px;font:italic 18px/1.55 "EB Garamond",serif;border-left:3px solid var(--accent);padding-left:12px}
+.ins h4{font:600 12px/1 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 6px}
+.ins .lead{font:19px/1.5 "EB Garamond",serif}
+.ins .body{font:17px/1.6 "EB Garamond",serif}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:12px Inter,sans-serif;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px}
+.rel{list-style:none;margin:0;padding:0}
+.rel li{padding:8px 0;border-bottom:1px solid var(--line);font:16px/1.45 "EB Garamond",serif}
+.ins a,.ans a{color:var(--accent);font-weight:600;text-decoration:none}
+.ins a:hover,.ans a:hover{text-decoration:underline}
+.dacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.dacts button{border:1px solid var(--accent);background:none;color:var(--accent);border-radius:999px;padding:7px 14px;font:500 13px Inter,sans-serif;cursor:pointer}
+.dacts button:disabled{opacity:.5;cursor:default}
+.loading{color:var(--muted);font:14px Inter,sans-serif;display:flex;align-items:center;gap:8px}
+.loading::before{content:"";width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{color:#b4442c;font:14px Inter,sans-serif}
+.msgs{display:flex;flex-direction:column;gap:12px}
+.msg{max-width:88%;padding:10px 14px;border-radius:14px;font:16px/1.5 Inter,sans-serif;white-space:pre-wrap}
+.msg.user{align-self:flex-end;background:var(--accent);color:var(--panel);border-bottom-right-radius:4px}
+.msg.assistant{align-self:flex-start;background:var(--bg);border:1px solid var(--line);border-bottom-left-radius:4px;font:17px/1.55 "EB Garamond",serif}
+.welcome{color:var(--muted);font:15px/1.5 Inter,sans-serif}
+.sugg{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.sugg button{text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 12px;font:14px Inter,sans-serif;cursor:pointer}
+.sugg button:hover{border-color:var(--accent)}
+.compose{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.compose textarea{flex:1;resize:none;min-height:44px;max-height:140px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:15px/1.4 Inter,sans-serif}
+.compose button{border:0;background:var(--accent);color:var(--panel);border-radius:10px;padding:0 16px;font:600 14px Inter,sans-serif;cursor:pointer}
+.compose button:disabled{opacity:.5}
+.dfoot{font:11px Inter,sans-serif;color:var(--muted);text-align:center;padding:0 16px 10px}
+@media (max-width:760px){header h1{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}header{gap:8px}#toc-btn{padding:6px 8px;font-size:14px}#ask-btn{padding:6px 10px;font-size:14px}}
 .note{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:28px;padding-top:12px}
 @media (max-width:760px){
   #menu{display:block}
@@ -104,11 +148,22 @@ body.on-cover nav,body.on-cover #menu{display:none}
 </style>
 </head>
 <body>
-<header><button id="menu" aria-label="Books">☰</button><h1 id="title"><a href="#cover">The Book of Elyon</a></h1><button id="toc-btn">Contents</button></header>
+<header><button id="menu" aria-label="Books">☰</button><h1 id="title"><a href="#cover">The Book of Elyon</a></h1><button id="toc-btn">Contents</button><button id="ask-btn">Ask Me</button></header>
 <div class="wrap">
   <nav id="nav"><input id="q" placeholder="Filter books…" aria-label="Filter books"><div id="list"></div></nav>
   <main id="main"><p class="meta">Loading…</p></main>
 </div>
+<aside class="drawer" id="ask" aria-label="Ask Me">
+  <div class="dhead"><h3>Ask Me</h3><button class="x" data-close="ask" aria-label="Close">×</button></div>
+  <div class="dbody"><div class="msgs" id="msgs"></div></div>
+  <form class="compose" id="ask-form"><textarea id="ask-in" rows="1" placeholder="Ask about a subject, a verse, a book…" aria-label="Your question"></textarea><button id="ask-send">Send</button></form>
+  <div class="dfoot">Answers are AI-generated and may contain mistakes. Conversations are not saved.</div>
+</aside>
+<aside class="drawer" id="ins" aria-label="Verse breakdown">
+  <div class="dhead"><h3>Verse Breakdown</h3><button class="x" data-close="ins" aria-label="Close">×</button></div>
+  <div class="dbody ins" id="ins-body"></div>
+  <div class="dfoot">AI-generated explanation. Compare with the text and other sources.</div>
+</aside>
 <script>
 const $=s=>document.querySelector(s);
 let IDX,cur={book:null,tr:null,ch:1},cache={};
@@ -116,6 +171,7 @@ const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&qu
 
 async function init(){
   IDX=await (await fetch('data/index.json')).json();
+  buildRefs();
   $('#title').textContent=IDX.title.split(':')[0];
   renderList('');
   const [id,tr,ch]=(location.hash.slice(1)||'').split('/');
@@ -126,7 +182,7 @@ function renderList(q){
   $('#list').innerHTML=IDX.books.filter(b=>!q||b.name.toLowerCase().includes(q)).map(b=>
     `<button class="bk${b.id===cur.book?' on':''}" data-id="${b.id}"><span class="p">p. ${b.page}</span><span class="o">${b.order}</span><span class="n">${esc(b.name)}</span><span class="d">${esc(b.date)}</span></button>`).join('');
 }
-async function open(id,tr,ch){
+async function open(id,tr,ch,verse){
   document.body.classList.remove('on-cover');
   const b=IDX.books.find(x=>x.id===id);
   cache[id]??=await (await fetch(`data/books/${id}.json`)).json();
@@ -150,7 +206,7 @@ async function open(id,tr,ch){
       <button class="btn" id="next" ${cur.ch>=n?'disabled':''}>›</button>
     </div>
     ${cur.ch===1&&b.intro?`<div class="intro"><b>About this book</b>${esc(b.intro)}</div>`:''}
-    <div class="text"><h3>Chapter ${cur.ch}</h3>${verses.map((v,i)=>`<span class="v"><sup>${i+1}</sup>${esc(v)}${alts[i+1]?`<a class="alt" href="javascript:void(0)" data-v="${i+1}" title="Alternate reading">†</a>`:''} </span>`).join('')}</div>
+    <div class="text"><h3>Chapter ${cur.ch}</h3><p class="hint">Double-tap any verse for an explanation and related passages.</p>${verses.map((v,i)=>`<span class="v" id="v${i+1}" data-v="${i+1}"><sup>${i+1}</sup>${esc(v)}${alts[i+1]?`<a class="alt" href="javascript:void(0)" data-v="${i+1}" title="Alternate reading">†</a>`:''} </span>`).join('')}</div>
     ${altList.length?`<div class="alts"><h4>Alternate readings</h4>${altList.map(([v,r])=>`<p id="alt-${v}"><span class="vn">${cur.ch}:${v}</span>${esc(r)}</p>`).join('')}</div>`:''}
     <div class="pager"><span>Page ${page} of ${IDX.pages}</span>
       <form id="go"><label>Go to page <input id="pg" type="number" min="1" max="${IDX.pages}" value="${page}"></label></form></div>
@@ -162,6 +218,7 @@ async function open(id,tr,ch){
   document.querySelectorAll('.alt').forEach(a=>a.onclick=()=>{const t=document.getElementById('alt-'+a.dataset.v);t.scrollIntoView({behavior:'smooth',block:'center'});t.style.background='var(--accent-soft)';setTimeout(()=>t.style.background='',1500);});
   $('#go').onsubmit=e=>{e.preventDefault(); goPage(+$('#pg').value);};
   renderList($('#q').value); $('#nav').classList.remove('open'); scrollTo(0,0);
+  if(verse){const el=document.getElementById('v'+verse); if(el){el.scrollIntoView({block:'center'}); el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),1800);}}
 }
 const FRONT=['cover','contents','references','credits'];
 const ROMAN=['i','ii','iii','iv'];
@@ -219,6 +276,99 @@ function goPage(n){
 addEventListener('hashchange',()=>{const [id,tr,ch]=location.hash.slice(1).split('/');
   if(IDX&&(FRONT.includes(id)||!id)){if(cur.front!==(id||'cover'))front(id);return;}
   if(IDX&&IDX.books.some(b=>b.id===id)&&[id,tr,ch].join('/')!==[cur.book,cur.tr,cur.ch].join('/')) open(id,tr,+ch||1);});
+// ----- Scripture references -> links -----
+let REF_RE=null, REF_MAP={};
+function buildRefs(){
+  const alias={'psalm':'PSA','song of solomon':'SOL','canticles':'SOL','ecclesiasticus':'SIR','wisdom':'WIS','revelations':'REV','qoheleth':'ECC','4 ezra':'4ES'};
+  for(const b of IDX.books) REF_MAP[b.name.toLowerCase()]=b.id;
+  for(const [k,v] of Object.entries(alias)) if(IDX.books.some(b=>b.id===v)) REF_MAP[k]=v;
+  const names=Object.keys(REF_MAP).sort((a,b)=>b.length-a.length).map(n=>n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/ /g,'\\s+'));
+  REF_RE=new RegExp('\\b('+names.join('|')+')\\s+(\\d{1,3})(?::(\\d{1,3})(?:\\s*[-–]\\s*\\d{1,3})?)?','gi');
+}
+function linkRefs(text){
+  // escape first, then link (names and digits contain nothing escapable)
+  return esc(text).replace(REF_RE,(m,name,ch,v)=>{const id=REF_MAP[name.toLowerCase().replace(/\s+/g,' ')]; return id?`<a href="#${id}/_/${ch}" data-ref="${id}|${ch}|${v||''}">${m}</a>`:m;});
+}
+document.addEventListener('click',e=>{const a=e.target.closest('a[data-ref]'); if(!a) return; e.preventDefault();
+  const [id,ch,v]=a.dataset.ref.split('|'); if(innerWidth<=760) closeDrawer(); open(id,null,+ch,+v||0);});
+
+// ----- Drawers -----
+function openDrawer(id){document.querySelectorAll('.drawer.open').forEach(d=>{if(d.id!==id)d.classList.remove('open')}); $('#'+id).classList.add('open');}
+function closeDrawer(){document.querySelectorAll('.drawer.open').forEach(d=>d.classList.remove('open')); document.querySelectorAll('.v.sel').forEach(x=>x.classList.remove('sel'));}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeDrawer);
+addEventListener('keydown',e=>{if(e.key==='Escape') closeDrawer();});
+
+async function api(path,body){
+  const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  let data={}; try{data=await r.json();}catch{}
+  if(!r.ok) throw new Error(data.error||'Something went wrong. Please try again.');
+  return data;
+}
+
+// ----- Double-tap a verse -----
+let lastTap={v:0,t:0};
+$('#main').addEventListener('click',e=>{
+  const el=e.target.closest('.text .v'); if(!el||e.target.closest('a')) return;
+  const v=+el.dataset.v, now=Date.now();
+  if(lastTap.v===v&&now-lastTap.t<400){lastTap={v:0,t:0}; getSelection()?.removeAllRanges(); verseInsight(v);}
+  else lastTap={v,t:now};
+});
+function verseRequest(v,kind){
+  const b=IDX.books.find(x=>x.id===cur.book), verses=cache[cur.book][cur.tr].chapters[cur.ch-1];
+  return {kind,bookId:b.id,book:b.name,translation:cur.tr,translationName:(IDX.translations[cur.tr]||{}).name||cur.tr,
+          chapter:cur.ch,verse:v,verseText:verses[v-1],chapterVerses:verses};
+}
+async function verseInsight(v){
+  document.querySelectorAll('.v.sel').forEach(x=>x.classList.remove('sel')); document.getElementById('v'+v)?.classList.add('sel');
+  const b=IDX.books.find(x=>x.id===cur.book), req=verseRequest(v,'simple'), ref=`${b.name} ${cur.ch}:${v}`;
+  const box=$('#ins-body'); openDrawer('ins');
+  box.innerHTML=`<div class="ref">${esc(ref)} · ${esc(cur.tr)}</div><blockquote>${esc(req.verseText)}</blockquote><div id="ins-out"><p class="loading">Reading this verse…</p></div>`;
+  try{
+    const d=await api('/api/verse',req);
+    if(!$('#ins-out')||req.verse!==v) return;
+    $('#ins-out').innerHTML=`
+      <h4>In plain words</h4><p class="lead">${esc(d.simple)}</p>
+      <h4>What it means</h4><p class="body">${linkRefs(d.explanation)}</p>
+      <h4>Why it matters</h4><p class="body">${linkRefs(d.whyItMatters)}</p>
+      ${d.keyThemes?.length?`<h4>Key themes</h4><div class="chips">${d.keyThemes.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}
+      ${d.relatedVerses?.length?`<h4>Read further</h4><ul class="rel">${d.relatedVerses.map(r=>`<li>${linkRefs(r.ref)} — ${esc(r.note)}</li>`).join('')}</ul>`:''}
+      <div id="deep"></div>
+      <div class="dacts"><button id="go-deeper">Go deeper</button><button id="ask-verse">Ask about this verse</button></div>`;
+    $('#go-deeper').onclick=async e=>{e.target.disabled=true; $('#deep').innerHTML='<p class="loading">Going deeper…</p>';
+      try{const x=await api('/api/verse',verseRequest(v,'deeper')); $('#deep').innerHTML=`<h4>Going deeper</h4>${x.deeper.split(/\n\s*\n/).map(p=>`<p class="body">${linkRefs(p)}</p>`).join('')}`; e.target.remove();}
+      catch(err){$('#deep').innerHTML=`<p class="err">${esc(err.message)}</p>`; e.target.disabled=false;}};
+    $('#ask-verse').onclick=()=>{openAsk(); $('#ask-in').value=`What does ${ref} mean? `; $('#ask-in').focus();};
+  }catch(err){ if($('#ins-out')) $('#ins-out').innerHTML=`<p class="err">${esc(err.message)}</p><div class="dacts"><button onclick="verseInsight(${v})">Try again</button></div>`; }
+}
+
+// ----- Ask Me -----
+const turns=[];
+function where(){ if(!cur.book) return ''; const b=IDX.books.find(x=>x.id===cur.book); return `${b.name} chapter ${cur.ch} (${cur.tr})`; }
+function renderMsgs(pending){
+  const box=$('#msgs');
+  if(!turns.length&&!pending){
+    const here=cur.book?IDX.books.find(x=>x.id===cur.book).name:null;
+    const s=[here?`What is ${here} about?`:'Why are these books arranged by date?', here?`Explain ${here} ${cur.ch} in simple words.`:'What is the Book of Enoch?', 'What does "Elyon" mean?'];
+    box.innerHTML=`<p class="welcome">Ask anything about a subject, a verse, a book, or a word. Answers point you to passages you can read here.</p><div class="sugg">${s.map(q=>`<button type="button">${esc(q)}</button>`).join('')}</div>`;
+    box.querySelectorAll('.sugg button').forEach(b=>b.onclick=()=>{$('#ask-in').value=b.textContent; send();});
+    return;
+  }
+  box.innerHTML=turns.map(t=>`<div class="msg ${t.role}${t.role==='assistant'?' ans':''}">${t.role==='assistant'?linkRefs(t.content):esc(t.content)}</div>`).join('')+(pending?`<p class="loading">Thinking…</p>`:'');
+  box.parentElement.scrollTop=box.parentElement.scrollHeight;
+}
+function openAsk(){ openDrawer('ask'); renderMsgs(); setTimeout(()=>$('#ask-in').focus(),50); }
+async function send(){
+  const q=$('#ask-in').value.trim(); if(!q||$('#ask-send').disabled) return;
+  turns.push({role:'user',content:q}); $('#ask-in').value=''; $('#ask-send').disabled=true; renderMsgs(true);
+  try{ const d=await api('/api/ask',{turns,context:where()}); turns.push({role:'assistant',content:d.text}); renderMsgs(); }
+  catch(err){ turns.pop(); renderMsgs(); $('#msgs').insertAdjacentHTML('beforeend',`<p class="err">${esc(err.message)}</p>`); $('#ask-in').value=q; }
+  finally{ $('#ask-send').disabled=false; $('#ask-in').focus(); }
+}
+$('#ask-btn').onclick=()=>$('#ask').classList.contains('open')?closeDrawer():openAsk();
+$('#ask-form').onsubmit=e=>{e.preventDefault(); send();};
+$('#ask-in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault(); send();}});
+$('#ask-in').addEventListener('input',e=>{e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,140)+'px';});
+
 $('#list').onclick=e=>{const b=e.target.closest('.bk'); if(b) open(b.dataset.id,null,1);};
 $('#q').oninput=e=>renderList(e.target.value);
 $('#toc-btn').onclick=()=>{location.hash='contents';contents();};

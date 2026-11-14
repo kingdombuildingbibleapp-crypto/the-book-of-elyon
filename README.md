@@ -4,7 +4,12 @@ A chronological collection of scripture: 82 books ordered by their approximate d
 
 - `data/elyon-data-v1.json` — the source data (books, dates, introductions, text).
 - `build.py` — splits the data into `public/data/` (one file per book) for the reader.
-- `public/index.html` — the reader: table of contents, continuous page numbers, translations, Greek alternate readings for 1 Enoch.
+- `public/index.html` — the reader: cover, contents, references and credits; continuous page numbers; translations; Greek alternate readings for 1 Enoch; the **Ask Me** chat and **double-tap verse breakdowns**.
+- `netlify/functions/` — the AI endpoints (`/api/ask`, `/api/verse`), calling Claude Sonnet 5.5 through the Anthropic SDK. Verse breakdowns are cached in Netlify Blobs, so each verse is generated once.
+
+## AI setup
+
+Add `ANTHROPIC_API_KEY` in Netlify under Site configuration → Environment variables (scope: Functions, mark as secret). The key never reaches the browser.
 
 ## Run locally
 
@@ -18,4 +23,4 @@ cd public && python3 -m http.server 8080
 
 ## Deploy
 
-Netlify runs `python3 build.py` and publishes `public/` (see `netlify.toml`).
+Netlify runs `python3 build.py`, publishes `public/`, and bundles `netlify/functions/` (see `netlify.toml`). Run `npm install` first when deploying from your own machine.
