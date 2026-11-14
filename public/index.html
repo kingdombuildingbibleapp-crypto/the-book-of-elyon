@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Book of Elyon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f3ec;--panel:#fffdf8;--ink:#2a2520;--muted:#7a6f62;--line:#e4dccf;--accent:#8a5a2b;--accent-soft:#f1e6d6}
+@media (prefers-color-scheme:dark){:root{--bg:#171513;--panel:#1f1c19;--ink:#ece4d8;--muted:#a3978a;--line:#34302b;--accent:#d9a36a;--accent-soft:#2c241b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+header h1{font:600 20px/1.2 "EB Garamond",serif;margin:0;flex:1}
+#menu{display:none;border:1px solid var(--line);background:none;color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit}
+.wrap{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 57px)}
+nav{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;max-height:calc(100vh - 57px);position:sticky;top:57px}
+nav input{width:calc(100% - 24px);margin:12px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.bk{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;padding:8px 14px;cursor:pointer;font:inherit;border-left:3px solid transparent}
+.bk:hover{background:var(--accent-soft)}
+.bk.on{border-left-color:var(--accent);background:var(--accent-soft)}
+.bk .n{font-weight:500}.bk .d{display:block;font-size:12px;color:var(--muted)}
+.bk .o{display:inline-block;width:26px;color:var(--muted);font-size:12px}
+main{padding:28px 20px 80px;max-width:760px;width:100%;margin:0 auto}
+.meta{color:var(--muted);font-size:14px;margin:4px 0 18px}
+h2{font:600 34px/1.15 "EB Garamond",serif;margin:0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 20px}
+select,.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;cursor:pointer}
+.btn:disabled{opacity:.4;cursor:default}
+.text{font:20px/1.65 "EB Garamond",serif}
+.text h3{font:600 14px/1 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.v sup{color:var(--accent);font:600 11px Inter,sans-serif;margin-right:4px}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:32px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.pager input{width:72px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit}
+.bk .p{float:right;font-size:12px;color:var(--muted)}
+.toc h2{text-align:center;margin-bottom:6px}
+.toc .sub{text-align:center;color:var(--muted);font:italic 18px "EB Garamond",serif;margin:0 0 28px}
+.toc h3{font:600 13px/1 Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:30px 0 8px}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li a{display:flex;align-items:baseline;gap:8px;padding:7px 0;color:inherit;text-decoration:none;border-bottom:1px dotted var(--line)}
+.toc li a:hover .t{color:var(--accent)}
+.toc .num{width:26px;flex:none;color:var(--muted);font-size:13px}
+.toc .t{font:19px/1.3 "EB Garamond",serif}
+.toc .dt{flex:1;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toc .pg{flex:none;font-variant-numeric:tabular-nums;font-size:14px}
+#toc-btn{border:1px solid var(--line);background:none;color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;cursor:pointer}
+@media (max-width:760px){.toc .dt{display:none}}
+.intro{font:italic 19px/1.6 "EB Garamond",serif;background:var(--accent-soft);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 8px 8px 0;margin:0 0 24px}
+.intro b{display:block;font:600 12px/1 Inter,sans-serif;font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.alt{color:var(--accent);text-decoration:none;font:600 12px Inter,sans-serif;margin-left:2px}
+.alts{margin-top:24px;padding:14px 18px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.alts h4{margin:0 0 8px;font:600 12px/1 Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.alts p{margin:8px 0;font:17px/1.55 "EB Garamond",serif}
+.alts p:target{background:var(--accent-soft)}
+.alts .vn{color:var(--accent);font:600 12px Inter,sans-serif;margin-right:6px}
+header h1 a{color:inherit;text-decoration:none}
+body.on-cover .wrap{grid-template-columns:1fr}
+body.on-cover nav,body.on-cover #menu{display:none}
+.cover{min-height:calc(100vh - 160px);display:flex;align-items:center;justify-content:center}
+.frame{max-width:560px;text-align:center;padding:48px 36px;border:1px solid var(--accent);outline:1px solid var(--accent);outline-offset:6px;background:var(--panel)}
+.kicker{font:italic 22px "EB Garamond",serif;color:var(--muted);margin:0}
+.ctitle{font:600 54px/1.05 "EB Garamond",serif;letter-spacing:.02em;margin:4px 0 10px;font-variant:small-caps}
+.csub{font:italic 20px "EB Garamond",serif;margin:0;color:var(--accent)}
+.orn{color:var(--accent);margin:22px 0;font-size:18px}
+.blurb{font:18px/1.6 "EB Garamond",serif;margin:0 0 22px;text-align:justify;hyphens:auto}
+.ctrans{font:13px/1.7 Inter,sans-serif;color:var(--muted);margin:0 0 26px}
+.open-btn{display:inline-block;border:1px solid var(--accent);color:var(--accent);text-decoration:none;padding:9px 20px;border-radius:999px;font:500 14px Inter,sans-serif}
+.open-btn:hover{background:var(--accent);color:var(--panel)}
+.fm{font-family:"EB Garamond",serif}
+.fh{text-align:center;font-variant:small-caps;letter-spacing:.06em;border-bottom:1px solid var(--accent);padding-bottom:10px;margin-bottom:22px}
+.toc2{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.toc2 h3,.fmh{font:600 15px/1.2 "EB Garamond",serif;font-variant:small-caps;letter-spacing:.08em;text-align:center;color:var(--accent);margin:18px 0 8px}
+.toc2 h3 small{display:block;font:italic 14px "EB Garamond",serif;font-variant:normal;letter-spacing:0;color:var(--muted);margin-top:2px}
+.leaders{list-style:none;margin:0;padding:0}
+.leaders a{display:flex;align-items:baseline;gap:6px;color:inherit;text-decoration:none;padding:2px 0;font-size:18px}
+.leaders a:hover .t{color:var(--accent)}
+.leaders .dots{flex:1;border-bottom:1px dotted var(--muted);transform:translateY(-4px);min-width:12px}
+.leaders .pg{font-variant-numeric:tabular-nums}
+.fintro,.fp{font-size:18px;line-height:1.6}
+.reftab{width:100%;border-collapse:collapse;font-size:15px;line-height:1.4}
+.reftab th{font:600 12px Inter,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;border-bottom:1px solid var(--accent);padding:6px 6px}
+.reftab td{border-bottom:1px solid var(--line);padding:6px;vertical-align:top}
+.reftab a{color:inherit}
+.reftab .ab{font:600 12px Inter,sans-serif;color:var(--accent);white-space:nowrap}
+.reftab .rn{color:var(--muted);font-size:14px}
+.reftab .pg{text-align:right;font-variant-numeric:tabular-nums}
+.credit{margin:0 0 16px}.credit p{margin:2px 0;font-size:17px}.credit .cn{font-weight:600}
+.cnote{color:var(--muted);font-size:15px}
+.colophon{text-align:center;color:var(--muted);font-style:italic;margin-top:32px}
+.turn{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:12px;border-top:1px solid var(--line);font:14px Inter,sans-serif}
+.turn a{color:var(--accent);text-decoration:none}
+.folio{font:italic 16px "EB Garamond",serif;color:var(--muted)}
+@media (max-width:760px){.toc2{grid-template-columns:1fr}.ctitle{font-size:40px}.frame{padding:36px 22px}.reftab .rn{display:none}}
+.note{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:28px;padding-top:12px}
+@media (max-width:760px){
+  #menu{display:block}
+  .wrap{grid-template-columns:1fr}
+  nav{display:none;position:fixed;inset:57px 0 0 0;max-height:none;z-index:4}
+  nav.open{display:block}
+  main{padding:20px 16px 60px}
+  h2{font-size:28px}
+}
+</style>
+</head>
+<body>
+<header><button id="menu" aria-label="Books">☰</button><h1 id="title"><a href="#cover">The Book of Elyon</a></h1><button id="toc-btn">Contents</button></header>
+<div class="wrap">
+  <nav id="nav"><input id="q" placeholder="Filter books…" aria-label="Filter books"><div id="list"></div></nav>
+  <main id="main"><p class="meta">Loading…</p></main>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+let IDX,cur={book:null,tr:null,ch:1},cache={};
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function init(){
+  IDX=await (await fetch('data/index.json')).json();
+  $('#title').textContent=IDX.title.split(':')[0];
+  renderList('');
+  const [id,tr,ch]=(location.hash.slice(1)||'').split('/');
+  if(IDX.books.some(b=>b.id===id)) open(id,tr,+ch||1); else front(id);
+}
+function renderList(q){
+  q=q.toLowerCase();
+  $('#list').innerHTML=IDX.books.filter(b=>!q||b.name.toLowerCase().includes(q)).map(b=>
+    `<button class="bk${b.id===cur.book?' on':''}" data-id="${b.id}"><span class="p">p. ${b.page}</span><span class="o">${b.order}</span><span class="n">${esc(b.name)}</span><span class="d">${esc(b.date)}</span></button>`).join('');
+}
+async function open(id,tr,ch){
+  document.body.classList.remove('on-cover');
+  const b=IDX.books.find(x=>x.id===id);
+  cache[id]??=await (await fetch(`data/books/${id}.json`)).json();
+  const trs=Object.keys(b.translations);
+  cur={book:id,tr:trs.includes(tr)?tr:trs[0],ch};
+  const n=b.translations[cur.tr]; cur.ch=Math.min(Math.max(1,ch),n);
+  location.replace('#'+[id,cur.tr,cur.ch].join('/'));
+  const verses=cache[id][cur.tr].chapters[cur.ch-1]||[];
+  const t=IDX.translations[cur.tr]||{};
+  const first=Object.values(b.translations)[0];
+  const page=b.page+Math.min(cur.ch,first)-1;
+  const alts=(cache[id][cur.tr].alternateReadings||{})[cur.ch]||{};
+  const altList=Object.entries(alts).sort((a,b)=>a[0]-b[0]).flatMap(([v,rs])=>rs.map(r=>[v,r]));
+  $('#main').innerHTML=`
+    <h2>${esc(b.name)}</h2>
+    <p class="meta">${esc(b.date)}${b.dateNote?' — '+esc(b.dateNote):''}</p>
+    <div class="bar">
+      <select id="tr" aria-label="Translation">${trs.map(k=>`<option value="${k}"${k===cur.tr?' selected':''}>${k}</option>`).join('')}</select>
+      <button class="btn" id="prev" ${cur.ch<=1?'disabled':''}>‹</button>
+      <select id="ch" aria-label="Chapter">${Array.from({length:n},(_,i)=>`<option${i+1===cur.ch?' selected':''}>${i+1}</option>`).join('')}</select>
+      <button class="btn" id="next" ${cur.ch>=n?'disabled':''}>›</button>
+    </div>
+    ${cur.ch===1&&b.intro?`<div class="intro"><b>About this book</b>${esc(b.intro)}</div>`:''}
+    <div class="text"><h3>Chapter ${cur.ch}</h3>${verses.map((v,i)=>`<span class="v"><sup>${i+1}</sup>${esc(v)}${alts[i+1]?`<a class="alt" href="javascript:void(0)" data-v="${i+1}" title="Alternate reading">†</a>`:''} </span>`).join('')}</div>
+    ${altList.length?`<div class="alts"><h4>Alternate readings</h4>${altList.map(([v,r])=>`<p id="alt-${v}"><span class="vn">${cur.ch}:${v}</span>${esc(r)}</p>`).join('')}</div>`:''}
+    <div class="pager"><span>Page ${page} of ${IDX.pages}</span>
+      <form id="go"><label>Go to page <input id="pg" type="number" min="1" max="${IDX.pages}" value="${page}"></label></form></div>
+    <p class="note">${esc(t.name||cur.tr)} · ${esc(t.license||'')}${t.note?'<br>'+esc(t.note):''}</p>`;
+  $('#tr').onchange=e=>open(id,e.target.value,1);
+  $('#ch').onchange=e=>open(id,cur.tr,+e.target.value);
+  $('#prev').onclick=()=>open(id,cur.tr,cur.ch-1);
+  $('#next').onclick=()=>open(id,cur.tr,cur.ch+1);
+  document.querySelectorAll('.alt').forEach(a=>a.onclick=()=>{const t=document.getElementById('alt-'+a.dataset.v);t.scrollIntoView({behavior:'smooth',block:'center'});t.style.background='var(--accent-soft)';setTimeout(()=>t.style.background='',1500);});
+  $('#go').onsubmit=e=>{e.preventDefault(); goPage(+$('#pg').value);};
+  renderList($('#q').value); $('#nav').classList.remove('open'); scrollTo(0,0);
+}
+const FRONT=['cover','contents','references','credits'];
+const ROMAN=['i','ii','iii','iv'];
+function front(kind){
+  if(!FRONT.includes(kind)) kind='cover';
+  cur={book:null,tr:null,ch:1,front:kind};
+  if(location.hash.slice(1)!==kind) history.pushState(null,'','#'+kind);
+  document.body.classList.toggle('on-cover',kind==='cover');
+  const k=FRONT.indexOf(kind), B=IDX.books;
+  const ce=b=>/\bCE\b/.test(b.date)&&!/BCE/.test(b.date);
+  const leaders=list=>`<ol class="leaders">${list.map(b=>`<li><a href="#${b.id}"><span class="t">${esc(b.name)}</span><span class="dots"></span><span class="pg">${b.page}</span></a></li>`).join('')}</ol>`;
+  const TR=IDX.translations;
+  const body={
+    cover:`<div class="cover">
+      <div class="frame">
+        <p class="kicker">The</p>
+        <h2 class="ctitle">Book of Elyon</h2>
+        <p class="csub">A Chronological Collection of Scripture</p>
+        <div class="orn">✦</div>
+        <p class="blurb">Elyon is the Hebrew name for God as “the Most High.” This volume gathers ${B.length} books of the Hebrew Bible, the Apocrypha, the Pseudepigrapha and the New Testament, and sets them not in their traditional canonical order but in the order in which scholars believe they were written, from the oldest psalms to the latest letters of the second century CE. Read straight through, it follows the growth of these scriptures across a thousand years.</p>
+        <p class="ctrans">${Object.values(TR).map(t=>esc(t.name.replace(/ with the 1611 Apocrypha/,''))).join('<br>')}</p>
+        <a class="open-btn" href="#contents">Open the book</a>
+      </div></div>`,
+    contents:`<div class="fm"><h2 class="fh">Contents</h2>
+      <div class="toc2"><div><h3>Part One<small>Before the Common Era</small></h3>${leaders(B.filter(b=>!ce(b)))}</div>
+      <div><h3>Part Two<small>The Common Era</small></h3>${leaders(B.filter(ce))}
+      <h3 class="fmh">Front Matter</h3><ol class="leaders">${FRONT.map((f,i)=>`<li><a href="#${f}"><span class="t">${f[0].toUpperCase()+f.slice(1)}</span><span class="dots"></span><span class="pg">${ROMAN[i]}</span></a></li>`).join('')}</ol></div></div></div>`,
+    references:`<div class="fm"><h2 class="fh">Books and References</h2>
+      <p class="fintro">Each book is placed by its approximate date of composition. The abbreviation, date and dating source used for every book are listed below. Dates for ancient texts are estimates, and many are disputed.</p>
+      <table class="reftab"><thead><tr><th>Abbr.</th><th>Book</th><th>Date</th><th>Reference</th><th>Page</th></tr></thead><tbody>
+      ${B.map(b=>`<tr><td class="ab">${b.id}</td><td><a href="#${b.id}">${esc(b.name)}</a></td><td>${esc(b.date)}</td><td class="rn">${esc(b.dateNote||'')}</td><td class="pg">${b.page}</td></tr>`).join('')}
+      </tbody></table></div>`,
+    credits:`<div class="fm"><h2 class="fh">Credits</h2>
+      <h3 class="fmh">Translations</h3>
+      ${Object.entries(TR).map(([k,t])=>`<div class="credit"><p class="cn">${esc(t.name)}</p><p>${esc(t.license)} · Source: ${esc(t.source)}${t.note?`<br><span class="cnote">${esc(t.note)}</span>`:''}</p><p class="cnote">Abbreviation in this edition: ${k}</p></div>`).join('')}
+      <h3 class="fmh">Arrangement</h3>
+      <p class="fp">Books are arranged by approximate date of composition, following the scholarly sources named on the References page. Chapters are numbered continuously as pages, one page per chapter of each book’s principal translation.</p>
+      <h3 class="fmh">Introductions</h3>
+      <p class="fp">The short introduction at the start of each book is editorial matter written for this edition. It is not part of the scriptural text.</p>
+      <h3 class="fmh">Notes</h3>
+      <p class="fp">Alternate readings from the Greek manuscripts of 1 Enoch are given beneath the chapters where they occur, marked †.</p>
+      <p class="fp colophon">${esc(IDX.title)}<br>${B.length} books · ${IDX.pages} pages · Edition ${esc(IDX.version)}</p></div>`
+  }[kind];
+  const prev=k>0?`<a href="#${FRONT[k-1]}">‹ ${FRONT[k-1][0].toUpperCase()+FRONT[k-1].slice(1)}</a>`:'<span></span>';
+  const next=k<FRONT.length-1?`<a href="#${FRONT[k+1]}">${FRONT[k+1][0].toUpperCase()+FRONT[k+1].slice(1)} ›</a>`:`<a href="#${B[0].id}">${esc(B[0].name)} ›</a>`;
+  $('#main').innerHTML=body+(kind==='cover'?'':`<div class="turn">${prev}<span class="folio">${ROMAN[k]}</span>${next}</div>`);
+  renderList($('#q').value); $('#nav').classList.remove('open'); scrollTo(0,0);
+}
+const contents=()=>front('contents');
+function goPage(n){
+  n=Math.min(Math.max(1,n|0),IDX.pages);
+  const b=[...IDX.books].reverse().find(x=>x.page<=n);
+  open(b.id,null,n-b.page+1);
+}
+addEventListener('hashchange',()=>{const [id,tr,ch]=location.hash.slice(1).split('/');
+  if(IDX&&(FRONT.includes(id)||!id)){if(cur.front!==(id||'cover'))front(id);return;}
+  if(IDX&&IDX.books.some(b=>b.id===id)&&[id,tr,ch].join('/')!==[cur.book,cur.tr,cur.ch].join('/')) open(id,tr,+ch||1);});
+$('#list').onclick=e=>{const b=e.target.closest('.bk'); if(b) open(b.dataset.id,null,1);};
+$('#q').oninput=e=>renderList(e.target.value);
+$('#toc-btn').onclick=()=>{location.hash='contents';contents();};
+$('#menu').onclick=()=>$('#nav').classList.toggle('open');
+init();
+</script>
+</body>
+</html>
