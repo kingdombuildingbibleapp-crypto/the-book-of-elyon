@@ -71,6 +71,8 @@ function friendly(e, flow) {
   if (/TooManyFailedAttempts|rate/i.test(m)) return "Too many tries. Please wait a few minutes and try again.";
   if (/fetch|network/i.test(m)) return "Could not connect. Check your internet connection and try again.";
   // The live backend hides error details, so say what usually went wrong.
+  if (flow === "reset") return "Could not send the code. Check the email address and try again in a minute.";
+  if (flow === "reset-verification") return "That code didn't work. Check it, or ask for a new one. New passwords need at least 8 characters.";
   return flow === "signUp"
     ? "Could not create the account. If you already have one with this email, try signing in instead."
     : "That email and password don't match an account. Check them and try again.";
@@ -80,13 +82,20 @@ const Elyon = {
   enabled,
   isSignedIn: () => signedIn,
   onAuth(cb) { listeners.add(cb); cb(signedIn); return () => listeners.delete(cb); },
-  async signIn(flow, { email, password, name }) {
+  /**
+   * flow: "signIn" | "signUp" | "reset" (emails a code) | "reset-verification"
+   * (code + newPassword, signs in with the new password).
+   */
+  async signIn(flow, { email, password, name, code, newPassword }) {
     if (!client) throw new Error("Accounts are not available yet.");
-    const params = { flow, email: String(email || "").trim().toLowerCase(), password: String(password || "") };
+    const params = { flow, email: String(email || "").trim().toLowerCase() };
+    if (flow === "signIn" || flow === "signUp") params.password = String(password || "");
     if (flow === "signUp") params.name = String(name || "").trim();
+    if (flow === "reset-verification") { params.code = String(code || "").replace(/\D/g, ""); params.newPassword = String(newPassword || ""); }
     let r;
     try { r = await anon().action("auth:signIn", { provider: "password", params }); }
     catch (e) { throw new Error(friendly(e, flow)); }
+    if (flow === "reset") return;
     if (!r || !r.tokens) throw new Error(friendly(null, flow));
     saveTokens(r.tokens);
     connect();

@@ -34,9 +34,36 @@ function worship(channelId: string, by: string, o: Options = {}): Channel {
 }
 
 // Approved channels. Nothing shows until at least one is listed for a kind.
+// Each `keep`/`skip` was tuned against the channel's real uploads (Nov 2026).
+const POLITICS = /trump|biden|huckabee|election|vote|politic|congress|iran|hamas|hezbollah|gaza|war\b|operation|antichrist|battle for|the west|news|update/i;
 export const CHANNELS: Channel[] = [
   // ---- Word for Today: Hebrew and Messianic teachers
+  word("UCQDc5idYQE2T6IYKT3bUN7A", "ONE FOR ISRAEL", {
+    skip: /pod for israel|one for israel tv|story|aliyah|worship|sing to|song|ashira|october 7|!$/i,
+  }),
+  word("UCm8v2K8fLkEoq4QEOEH0m7Q", "Rabbi Kirt Schneider", {
+    skip: /interview|kidnapped|billboard|part \d/i,
+  }),
+  word("UCjsoQpzk-XQOt4YM6nzq_-Q", "Jonathan Cahn", {
+    keep: /sermon|full message/i,
+    skip: join(POLITICS, /tour|cruise|special|halloween|because you asked|america|islam|nazi|new york|national judgment|harbinger/i),
+  }),
+  word("UCa3C7WpFobavsDJdkKUtodw", "Amir Tsarfati", {
+    keep: /bible|devotional|testament|scripture|gospel|jesus|yeshua|irrevocable|truth be told/i,
+    skip: join(POLITICS, /prophetic timeline|time is running out|too late/i),
+  }),
   // ---- Worship: songs sung in Hebrew
+  worship("UCUnGMSK1qwdmUwOw7UypW-A", "Shilo Ben Hod", { skip: /what is solu/i }),
+  worship("UCo_DEZcd1mUgIEuE_XLms7Q", "Joshua Aaron", {
+    skip: /\bstop\b|cities|introduction|shalom|gather the nations|full concert|pre ?order|masada|upper room|miss you|^[“"]/i,
+  }),
+  worship("UC6Zjr_rR7K9rTOcaZ6ywEtg", "Emanuel Roro", {
+    skip: /reaction|sunday service|interview|instrumental|pray together|bomb shelter|streets of jaffa|kanye|guitar|strings|^miqedem$|shilo ben hod/i,
+  }),
+  worship("UCQDc5idYQE2T6IYKT3bUN7A", "ONE FOR ISRAEL", {
+    keep: /sing|song|worship|hallel|ashira|praise|psalm/i,
+    skip: /what happens when|pod for israel|tv\b|together\?/i,
+  }),
 ];
 
 function decode(s: string): string {
@@ -49,15 +76,26 @@ function decode(s: string): string {
     .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)));
 }
 
-/** The title the card shows: the upload title without the channel name, hashtags and labels. */
-export function cleanTitle(title: string, by: string): string {
+/** The title the card shows: the upload title without the channel name, handles, hashtags and labels. */
+export function cleanTitle(title: string, by: string, kind: Kind = "word"): string {
   const name = by.toLowerCase();
+  const junk = /^(official( music)? video|music video|live|lyrics?|4k|hd|hebrew worship|best worship songs.*|sermon|full message|subs)$/i;
   const pieces = title
-    .replace(/#\S+/g, "")
-    .split(/\s+[|│–—-]\s+|\s*[|│]\s*/)
-    .map((s) => s.replace(/[([](?:official[^)\]]*|live|lyrics?|feat[^)\]]*|ft\.?[^)\]]*|4k|hd)[)\]]/gi, "").replace(/\s+/g, " ").trim())
-    .filter((s) => s && s.toLowerCase() !== name && !/^(official( music)? video|live|lyrics?|4k|hd)$/i.test(s));
-  return (pieces[0] ?? title).trim().slice(0, 120);
+    .replace(/@SOLU ?Israel/gi, "").replace(/#\S+|@\S+/g, "")
+    .replace(/\s+LIVE (?:at|from) [^|/]*/gi, "")
+    .split(kind === "worship" ? /\s+[|│–—-]\s+|\s*[|│/]\s*/ : /\s+[|│–—]\s+|\s*[|│]\s*/)
+    .map((s) =>
+      s
+        .replace(/[([](?:official[^)\]]*|live[^)\]]*|lyrics?|feat[^)\]]*|ft\.?[^)\]]*|4k|hd|subs|music video[^)\]]*|\d{4}|worship session|hebrew worship|jerusalem worship)[)\]]/gi, "")
+        .replace(/\s+/g, " ")
+        .replace(/^[\s\-–—:&,]+|[\s\-–—:&,]+$/g, "")
+        .trim(),
+    )
+    .filter((s) => s && !s.toLowerCase().includes(name) && !/sermon$|full message$/i.test(s) && !junk.test(s));
+  if (!pieces.length) return title.trim().slice(0, 120);
+  // Worship: keep the Hebrew title alongside the English one ("Avinu · Our Father").
+  const out = kind === "worship" && pieces[1] && pieces[1].length <= 32 ? `${pieces[0]} · ${pieces[1]}` : pieces[0];
+  return out.slice(0, 120);
 }
 
 /** Pulls the uploads out of a channel's YouTube feed. */
@@ -70,7 +108,9 @@ export function parseFeed(xml: string, ch: Channel) {
     if (!id || !raw || Number.isNaN(published)) continue;
     const title = decode(raw);
     if (!ch.keep.test(title) || ch.skip.test(title)) continue;
-    const clean = cleanTitle(title, ch.by);
+    // Artists' channels also carry posts like "Seven more cities to go! 🔥".
+    if (ch.kind === "worship" && /\p{Extended_Pictographic}|\p{Regional_Indicator}|!!/u.test(title)) continue;
+    const clean = cleanTitle(title, ch.by, ch.kind);
     if (!clean) continue;
     out.push({ kind: ch.kind, channelId: ch.channelId, youtubeId: id, title: clean, by: ch.by, publishedAt: published });
   }

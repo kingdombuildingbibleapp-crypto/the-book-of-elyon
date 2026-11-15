@@ -238,18 +238,53 @@ function openSignIn(mode = 'signIn', reason = '') {
       <p class="err" id="si-err" role="alert"></p>
       <button class="pill solid wide" id="si-go">${mode === 'signUp' ? 'Create account' : 'Sign in'}</button>
     </form>
+    ${mode === 'signIn' ? '<p class="swap forgot"><a href="javascript:void(0)" data-forgot>Forgot password?</a></p>' : ''}
     <p class="swap">${mode === 'signUp' ? 'Already have an account? <a href="javascript:void(0)" data-mode="signIn">Sign in</a>' : 'New here? <a href="javascript:void(0)" data-mode="signUp">Create an account</a>'}</p>
   </div>`;
   m.hidden = false;
   m.querySelector('input').focus();
   m.querySelector('[data-x]').onclick = closeSignIn;
   m.querySelector('[data-mode]').onclick = (e) => openSignIn(e.target.dataset.mode, reason);
+  m.querySelector('[data-forgot]')?.addEventListener('click', () => openReset(m.querySelector('input[name=email]').value));
   $('#si-form').onsubmit = async (e) => {
     e.preventDefault();
     const f = Object.fromEntries(new FormData(e.target));
     $('#si-go').disabled = true; $('#si-err').textContent = '';
     try { await E().signIn(mode, f); closeSignIn(); toast(mode === 'signUp' ? `Welcome, ${f.name.split(' ')[0]}!` : 'Signed in'); }
     catch (err) { $('#si-err').textContent = err.message; $('#si-go').disabled = false; }
+  };
+}
+/** Forgot password: step 1 emails a code, step 2 sets the new password. */
+function openReset(email = '', sent = false) {
+  const m = $('#signin');
+  m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="si-h">
+    <button class="x" data-x aria-label="Close">×</button>
+    <picture><source srcset="/brand/mark-dark.svg" media="(prefers-color-scheme: dark)"><img class="smark" src="/brand/mark.svg" alt=""></picture>
+    <h3 id="si-h">${sent ? 'Check your email' : 'Reset your password'}</h3>
+    <p class="sreason">${sent ? `We sent an 8-digit code to <b>${esc(email)}</b>. It works for 15 minutes.` : 'Enter your email and we’ll send you a code.'}</p>
+    <form id="si-form">
+      ${sent ? `<label>Code<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{8,9}" maxlength="9" required></label>
+        <label>New password<input name="newPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+        <p class="hintx">At least 8 characters.</p>`
+      : `<label>Email<input name="email" type="email" autocomplete="email" required value="${esc(email)}"></label>`}
+      <p class="err" id="si-err" role="alert"></p>
+      <button class="pill solid wide" id="si-go">${sent ? 'Set new password' : 'Send code'}</button>
+    </form>
+    <p class="swap">${sent ? '<a href="javascript:void(0)" data-resend>Send a new code</a> · ' : ''}<a href="javascript:void(0)" data-back>Back to sign in</a></p>
+  </div>`;
+  m.hidden = false;
+  m.querySelector('input').focus();
+  m.querySelector('[data-x]').onclick = closeSignIn;
+  m.querySelector('[data-back]').onclick = () => openSignIn('signIn');
+  m.querySelector('[data-resend]')?.addEventListener('click', () => openReset(email, false));
+  $('#si-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    $('#si-go').disabled = true; $('#si-err').textContent = '';
+    try {
+      if (!sent) { await E().signIn('reset', { email: f.email }); openReset(f.email.trim(), true); }
+      else { await E().signIn('reset-verification', { email, code: f.code, newPassword: f.newPassword }); closeSignIn(); toast('Password changed. You’re signed in.'); }
+    } catch (err) { $('#si-err').textContent = err.message; $('#si-go').disabled = false; }
   };
 }
 function closeSignIn() { $('#signin').hidden = true; $('#signin').innerHTML = ''; }
