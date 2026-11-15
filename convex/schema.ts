@@ -25,6 +25,8 @@ export default defineSchema({
   purchases: defineTable({
     userId: v.id("users"),
     product: v.literal("plus"),
+    // Stripe Checkout session id, or "gift:<code>:<userId>" / "owner:<userId>"
+    // for free access given by the owner (owner.ts).
     sessionId: v.string(),
     amount: v.number(), // cents
     currency: v.string(),
@@ -32,6 +34,16 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_sessionId", ["sessionId"]),
+
+  // Free Elyon Plus links the owner shares (owner.ts).
+  giftLinks: defineTable({
+    code: v.string(),
+    label: v.string(),
+    maxUses: v.union(v.number(), v.null()), // null = unlimited
+    uses: v.number(),
+    active: v.boolean(),
+    createdAt: v.number(),
+  }).index("by_code", ["code"]),
 
   // Study plans a reader has started (plans themselves are in planCatalog.ts).
   planEnrollments: defineTable({

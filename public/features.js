@@ -11,6 +11,8 @@ let myPlans = [];            // [{ planId, startedAt, done: [day] }]
 let plus = false;            // has Elyon Plus (checked again on the server)
 let plusConfirmed = '';      // Checkout session already confirmed
 let plusKnown = false;       // hasPlus has answered at least once since sign-in
+let isOwner = false;         // listed in OWNER_EMAILS on the backend
+let giftTried = '';          // free link already redeemed this visit
 // In the Android and iOS apps, store rules forbid selling the upgrade
 // through our own checkout: the apps unlock it by signing in instead.
 const isApp = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -288,6 +290,66 @@ PAGES.plus = async ([sub, sessionId]) => {
   });
 };
 
+// ------------------------------------------------------------ Free links (owner)
+const giftUrl = (code) => `https://bookofelyon.org/#gift/${code}`;
+PAGES.owner = async () => {
+  if (!isOwner) return page('owner', `<h2 class="ph">Owner</h2><p class="pintro">This page is only for the site owner. ${me ? '' : 'Please sign in.'}</p>`);
+  page('owner', `<h2 class="ph">Owner</h2><p class="pintro">Share Elyon Plus for free. Anyone who opens a free link and signs in gets the full version, Ask Me, verse breakdowns, notes, study plans and the daily videos, at no cost.</p><div id="owner-body"><p class="loading">Loading…</p></div>`);
+  let ov;
+  try { ov = await E().query('owner:overview', {}); } catch (e) { $('#owner-body').innerHTML = `<p class="err">${esc(String(e.message).split('\n')[0])}</p>`; return; }
+  if (cur.page !== 'owner') return;
+  $('#owner-body').innerHTML = `
+    <div class="two"><section class="card"><p class="eyebrow">Readers with Elyon Plus</p><p class="ph" style="margin:0">${ov.plusMembers}</p><p class="sub">${ov.paid} paid · ${ov.plusMembers - ov.paid} free</p></section>
+      <section class="card"><p class="eyebrow">Free links</p><p class="ph" style="margin:0">${ov.gifts.length}</p><p class="sub">${ov.gifts.reduce((n, g) => n + g.uses, 0)} people used them</p></section></div>
+    <section class="card"><p class="eyebrow">Make a free link</p>
+      <form id="gift-form" class="row"><input name="label" placeholder="Name it, e.g. Church family" maxlength="80" class="oinput">
+        <input name="max" type="number" min="1" placeholder="Limit (empty = unlimited)" class="oinput small"><button class="pill solid">Create link</button></form></section>
+    ${ov.gifts.map((g) => `<section class="card gift ${g.active ? '' : 'off'}">
+      <div class="row" style="margin:0 0 8px;justify-content:space-between"><b>${esc(g.label)}</b><span class="sub" style="margin:0">${g.uses}${g.maxUses ? ' of ' + g.maxUses : ''} used · ${g.active ? 'On' : 'Off'}</span></div>
+      <div class="row" style="margin:0"><input class="oinput link" readonly value="${giftUrl(g.code)}"><button class="pill solid" data-copy="${g.code}">Copy</button><button class="pill" data-share="${g.code}">Share</button>
+      <button class="pill" data-toggle="${g.code}|${g.active ? 0 : 1}">${g.active ? 'Turn off' : 'Turn on'}</button></div></section>`).join('')}
+    <section class="card"><p class="eyebrow">Give Elyon Plus to an account</p><p class="sub">For someone who already has an account on bookofelyon.org.</p>
+      <form id="grant-form" class="row"><input name="email" type="email" required placeholder="their@email.com" class="oinput"><button class="pill solid">Give Elyon Plus</button></form><p id="grant-msg" class="sub"></p></section>`;
+  $('#gift-form').onsubmit = (e) => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target));
+    act(() => E().mutation('owner:createGift', { label: f.label || '', maxUses: f.max ? +f.max : null }), null, () => { toast('Free link created'); PAGES.owner(); }); };
+  $('#grant-form').onsubmit = (e) => { e.preventDefault(); const email = new FormData(e.target).get('email');
+    act(async () => { $('#grant-msg').textContent = await E().mutation('owner:grantByEmail', { email }); }); };
+};
+document.addEventListener('click', (e) => {
+  const c = e.target.closest('[data-copy]'), sh = e.target.closest('[data-share]'), tg = e.target.closest('[data-toggle]');
+  if (c) { navigator.clipboard?.writeText(giftUrl(c.dataset.copy)).then(() => toast('Link copied'), () => toast('Select the link and copy it', true)); }
+  if (sh) { const url = giftUrl(sh.dataset.share);
+    if (navigator.share) navigator.share({ title: 'The Book of Elyon', text: 'A gift for you: the full Book of Elyon, free.', url }).catch(() => {});
+    else navigator.clipboard?.writeText(url).then(() => toast('Link copied')); }
+  if (tg) { const [code, on] = tg.dataset.toggle.split('|'); act(() => E().mutation('owner:setGiftActive', { code, active: on === '1' }), null, () => PAGES.owner()); }
+});
+
+// The page a free link opens: sign in, then Elyon Plus unlocks.
+PAGES.gift = async ([code]) => {
+  page('gift', `<div class="plus-hero"><p class="eyebrow">✦ A gift for you</p><h2 class="ph">The full Book of Elyon, free</h2><div id="gift-body"><p class="loading">Opening your gift…</p></div></div>`);
+  if (!E().enabled || !code) { $('#gift-body').innerHTML = '<p class="pintro">This link isn’t working right now.</p>'; return; }
+  const info = await E().query('owner:giftInfo', { code }).catch(() => null);
+  if (cur.page !== 'gift') return;
+  const box = $('#gift-body');
+  if (!info) { box.innerHTML = '<p class="pintro">This free link isn’t valid. Check that you have the whole link.</p>'; return; }
+  if (plus) { box.innerHTML = `<p class="pintro">${giftTried === code ? 'Elyon Plus is unlocked. Enjoy!' : 'You already have Elyon Plus. Enjoy!'}</p><a class="pill solid" href="#today">Go to Today</a>`; return; }
+  if (!info.open) { box.innerHTML = '<p class="pintro">This free link has been used up or turned off.</p><a class="pill" href="#plus">See Elyon Plus</a>'; return; }
+  if (!me) {
+    box.innerHTML = `<p class="pintro">You’ve been given Elyon Plus: Ask Me, verse breakdowns, notes, study plans and daily Hebrew worship, free.<br>Create a free account (or sign in) to claim it.</p>
+      <button class="pill solid" id="gift-claim" style="font-size:16px;padding:12px 28px">Create an account to claim</button><p class="plus-free">Already have an account? <a href="javascript:void(0)" data-signin>Sign in</a></p>`;
+    $('#gift-claim').onclick = () => openSignIn('signUp', 'Create a free account to claim your gift.');
+    return;
+  }
+  if (giftTried === code) return;
+  giftTried = code;
+  box.innerHTML = '<p class="loading">Unlocking…</p>';
+  try {
+    const r = await E().mutation('owner:redeemGift', { code });
+    box.innerHTML = r === 'unlocked' || r === 'already' ? '<p class="pintro">Elyon Plus is unlocked. Enjoy!</p><a class="pill solid" href="#today">Go to Today</a>'
+      : '<p class="pintro">This free link has been used up or turned off.</p>';
+  } catch (e) { giftTried = ''; box.innerHTML = `<p class="err">${esc(String(e.message).split('\n')[0])}</p>`; }
+};
+
 // ------------------------------------------------------------ Privacy and Terms
 // Required by the app stores. Keep in step with what the site really does.
 const CONTACT = 'support@bookofelyon.org';
@@ -408,7 +470,7 @@ function openAcctMenu() {
   const m = $('#acct-menu');
   if (!m.hidden) { m.hidden = true; return; }
   m.innerHTML = `<p class="who"><b>${esc(me.name || 'Signed in')}</b><br>${esc(me.email)}</p>
-    <a href="#plus">${plus ? '✦ Elyon Plus ✓' : '✦ Get Elyon Plus'}</a><a href="#notes">My notes</a><a href="#plans">My study plans</a>
+    ${isOwner ? '<a href="#owner">⚙ Owner: free links</a>' : ''}<a href="#plus">${plus ? '✦ Elyon Plus ✓' : '✦ Get Elyon Plus'}</a><a href="#notes">My notes</a><a href="#plans">My study plans</a>
     <button data-out>Sign out</button><button class="danger" data-delete>Delete account</button>`;
   m.hidden = false;
   m.querySelector('[data-out]').onclick = async () => { m.hidden = true; await E().signOut(); toast('Signed out'); };
@@ -453,6 +515,7 @@ function startWatching() {
   unwatch.push(E().watch('users:me', {}, (u) => { me = u; acctButton(); rerender(); }));
   unwatch.push(E().watch('notes:mine', {}, (n) => { myNotes = n; markNotes(); if (cur.page === 'notes') PAGES.notes(); }));
   unwatch.push(E().watch('plans:mine', {}, (p) => { myPlans = p; if (cur.page === 'plans' || cur.page === 'today') rerender(); }));
+  unwatch.push(E().watch('owner:isOwner', {}, (o) => { isOwner = o; if (cur.page === 'owner') rerender(); }, () => { isOwner = false; }));
   unwatch.push(E().watch('billing:hasPlus', {}, (h) => {
     if (h && !plus && plusKnown && cur.page !== 'plus') toast('✦ Elyon Plus is unlocked');
     plus = h; plusKnown = true; rerender();
@@ -482,6 +545,6 @@ function boot() {
   acctButton();
   if (!PAGES[location.hash.slice(1).split('/')[0]]) markTab('read');
   if (!E().enabled) return;
-  E().onAuth((signedIn) => { if (!signedIn) { me = null; myNotes = []; myPlans = []; plus = false; plusKnown = false; acctButton(); rerender(); } startWatching(); });
+  E().onAuth((signedIn) => { if (!signedIn) { me = null; myNotes = []; myPlans = []; plus = false; plusKnown = false; isOwner = false; acctButton(); rerender(); } startWatching(); });
 }
 if (window.Elyon) boot(); else addEventListener('elyon-ready', boot, { once: true });

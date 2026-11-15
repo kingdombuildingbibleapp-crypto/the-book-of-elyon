@@ -154,3 +154,40 @@ test("signed-out readers see the daily videos as locked", async () => {
   const t = convexTest(schema, modules);
   expect(await t.query(api.videos.forDay, { date: "2026-03-10" })).toEqual({ word: null, worship: null, locked: true });
 });
+
+test("owner: free links give Plus, respect limits and on/off; grant by email; others are refused", async () => {
+  process.env.OWNER_EMAILS = "Owner@Example.com";
+  const t = convexTest(schema, modules);
+  const owner = await reader(t, "owner@example.com", false);
+  const a = await reader(t, "a@example.com", false);
+  const b = await reader(t, "b@example.com", false);
+  const c = await reader(t, "c@example.com", false);
+  expect(await owner.as.query(api.owner.isOwner, {})).toBe(true);
+  expect(await a.as.query(api.owner.isOwner, {})).toBe(false);
+  await expect(a.as.mutation(api.owner.createGift, { label: "x", maxUses: null })).rejects.toThrow(/owner/);
+  await expect(a.as.query(api.owner.overview, {})).rejects.toThrow(/owner/);
+
+  const code = await owner.as.mutation(api.owner.createGift, { label: "Friends", maxUses: 1 });
+  expect(code).toMatch(/^[a-z2-9]{10}$/);
+  expect(await t.query(api.owner.giftInfo, { code })).toEqual({ label: "Friends", open: true });
+  expect(await a.as.mutation(api.owner.redeemGift, { code })).toBe("unlocked");
+  expect(await a.as.query(api.billing.hasPlus, {})).toBe(true);
+  expect(await a.as.mutation(api.owner.redeemGift, { code })).toBe("already");
+  expect(await b.as.mutation(api.owner.redeemGift, { code })).toBe("closed"); // limit of 1 reached
+  expect(await b.as.mutation(api.owner.redeemGift, { code: "nope" })).toBe("unknown");
+
+  const open = await owner.as.mutation(api.owner.createGift, { label: "Everyone", maxUses: null });
+  await owner.as.mutation(api.owner.setGiftActive, { code: open, active: false });
+  expect(await b.as.mutation(api.owner.redeemGift, { code: open })).toBe("closed");
+  await owner.as.mutation(api.owner.setGiftActive, { code: open, active: true });
+  expect(await b.as.mutation(api.owner.redeemGift, { code: open })).toBe("unlocked");
+
+  expect(await owner.as.mutation(api.owner.grantByEmail, { email: " C@example.com " })).toMatch(/given/);
+  expect(await c.as.query(api.billing.hasPlus, {})).toBe(true);
+  expect(await owner.as.mutation(api.owner.grantByEmail, { email: "nobody@example.com" })).toMatch(/No account/);
+  const ov = await owner.as.query(api.owner.overview, {});
+  expect(ov.plusMembers).toBe(3);
+  expect(ov.paid).toBe(0);
+  expect(ov.gifts.map((g) => [g.label, g.uses])).toEqual([["Everyone", 1], ["Friends", 1]]);
+  delete process.env.OWNER_EMAILS;
+});

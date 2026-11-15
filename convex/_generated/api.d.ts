@@ -16,6 +16,7 @@ import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as notes from "../notes.js";
+import type * as owner from "../owner.js";
 import type * as planCatalog from "../planCatalog.js";
 import type * as plans from "../plans.js";
 import type * as users from "../users.js";
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/auth": typeof lib_auth;
   notes: typeof notes;
+  owner: typeof owner;
   planCatalog: typeof planCatalog;
   plans: typeof plans;
   users: typeof users;
