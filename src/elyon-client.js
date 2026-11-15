@@ -70,7 +70,10 @@ function friendly(e, flow) {
   if (/Invalid password/i.test(m)) return "Please choose a password of at least 8 characters.";
   if (/TooManyFailedAttempts|rate/i.test(m)) return "Too many tries. Please wait a few minutes and try again.";
   if (/fetch|network/i.test(m)) return "Could not connect. Check your internet connection and try again.";
-  return flow === "signUp" ? "Could not create the account. Please try again." : "Could not sign in. Please try again.";
+  // The live backend hides error details, so say what usually went wrong.
+  return flow === "signUp"
+    ? "Could not create the account. If you already have one with this email, try signing in instead."
+    : "That email and password don't match an account. Check them and try again.";
 }
 
 const Elyon = {
