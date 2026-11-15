@@ -1,0 +1,59 @@
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
+
+const kind = v.union(v.literal("word"), v.literal("worship"));
+
+export default defineSchema({
+  // Accounts, sessions and sign-in tokens (Convex Auth).
+  ...authTables,
+
+  // A reader's note on a verse. Notes belong to the verse, not to a
+  // translation, so they show in every translation of that verse.
+  notes: defineTable({
+    userId: v.id("users"),
+    bookId: v.string(),
+    chapter: v.number(),
+    verse: v.number(),
+    text: v.string(),
+    updatedAt: v.number(),
+  })
+    .index("by_userId_and_updatedAt", ["userId", "updatedAt"])
+    .index("by_userId_and_bookId_and_chapter_and_verse", ["userId", "bookId", "chapter", "verse"]),
+
+  // Study plans a reader has started (plans themselves are in planCatalog.ts).
+  planEnrollments: defineTable({
+    userId: v.id("users"),
+    planId: v.string(),
+    startedAt: v.number(),
+  }).index("by_userId_and_planId", ["userId", "planId"]),
+
+  // One row per finished day of a plan.
+  planDays: defineTable({
+    userId: v.id("users"),
+    planId: v.string(),
+    day: v.number(),
+    doneAt: v.number(),
+  }).index("by_userId_and_planId_and_day", ["userId", "planId", "day"]),
+
+  // "Word for Today" and "Worship" videos collected from the approved
+  // YouTube channels in videos.ts by a cron (crons.ts).
+  videos: defineTable({
+    kind,
+    channelId: v.string(),
+    youtubeId: v.string(),
+    title: v.string(),
+    by: v.string(),
+    publishedAt: v.number(),
+  })
+    .index("by_kind_and_publishedAt", ["kind", "publishedAt"])
+    .index("by_youtubeId", ["youtubeId"]),
+
+  // Which video each calendar day shows, so everyone sees the same one.
+  videoPicks: defineTable({
+    kind,
+    date: v.string(), // "YYYY-MM-DD" (UTC)
+    youtubeId: v.string(),
+    channelId: v.string(),
+  }).index("by_kind_and_date", ["kind", "date"]),
+});

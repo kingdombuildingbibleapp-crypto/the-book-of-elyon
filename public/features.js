@@ -1,0 +1,331 @@
+// The Book of Elyon: Today, Study Plans, Topics, Notes and accounts.
+// Runs after the reader script in index.html and uses its helpers
+// ($, esc, IDX, cur, cache, open, linkRefs, openAsk, openDrawer).
+// Accounts and saved data go through window.Elyon (public/js/elyon-client.js).
+
+const PAGES = {};            // route name -> render(args)
+let TOPICS = null, PLANS = null;
+let me = null;               // { name, email } when signed in
+let myNotes = [];            // [{ bookId, chapter, verse, text, updatedAt }]
+let myPlans = [];            // [{ planId, startedAt, done: [day] }]
+let unwatch = [];
+const E = () => window.Elyon || { enabled: false, isSignedIn: () => false };
+
+const json = async (u) => (await fetch(u)).json();
+const loadTopics = async () => (TOPICS ??= await json('topics.json'));
+const loadPlans = async () => (PLANS ??= await json('data/plans.json'));
+const bookName = (id) => (IDX.books.find((b) => b.id === id) || {}).name || id;
+const bookOrder = (id) => (IDX.books.find((b) => b.id === id) || {}).order || 999;
+const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+const firstTr = (id) => Object.keys(IDX.books.find((b) => b.id === id).translations)[0];
+
+/** "John 3:16-18" -> { id, ch, v1, v2 } using the reader's book-name map. */
+function parseRef(ref) {
+  const m = /^(.+?) (\d+):(\d+)(?:-(\d+))?$/.exec(ref);
+  if (!m) return null;
+  const id = REF_MAP[m[1].toLowerCase()];
+  return id ? { id, ch: +m[2], v1: +m[3], v2: +(m[4] || m[3]) } : null;
+}
+async function versesOf(r) {
+  cache[r.id] ??= await json(`data/books/${r.id}.json`);
+  const ch = cache[r.id][firstTr(r.id)].chapters[r.ch - 1] || [];
+  return ch.slice(r.v1 - 1, r.v2).map((t, i) => ({ n: r.v1 + i, t }));
+}
+function refLink(r, label) { return `<a href="#${r.id}/_/${r.ch}" data-ref="${r.id}|${r.ch}|${r.v1}">${esc(label)}</a>`; }
+
+// ------------------------------------------------------------ page shell
+function page(name, html) {
+  cur = { book: null, tr: null, ch: 1, page: name };
+  document.body.classList.remove('on-cover');
+  $('#main').innerHTML = `<div class="pg-wrap">${html}</div>`;
+  $('#nav').classList.remove('open');
+  renderList($('#q').value);
+  markTab(name);
+  scrollTo(0, 0);
+}
+function markTab(name) {
+  document.querySelectorAll('#tabs a').forEach((a) => a.classList.toggle('on', a.dataset.tab === name || (name === 'read' && a.dataset.tab === 'read')));
+}
+function needAccount(what) {
+  if (!E().enabled) return `<div class="card soft"><p>${esc(what)} will be available once accounts are switched on.</p></div>`;
+  return `<div class="card soft"><p>${esc(what)} are saved to your account.</p><button class="pill solid" data-signin>Sign in or create an account</button></div>`;
+}
+
+// ------------------------------------------------------------ Today
+const yt = (v) => v ? `
+  <div class="vcard">
+    <button class="vthumb" data-yt="${esc(v.youtubeId)}" style="background-image:url('https://i.ytimg.com/vi/${encodeURIComponent(v.youtubeId)}/hqdefault.jpg')" aria-label="Play ${esc(v.title)}"><span>▶</span></button>
+    <p class="vt">${esc(v.title)}</p><p class="vb">${esc(v.by)}</p>
+  </div>` : `<div class="vcard empty"><p>Today’s video will appear here soon.</p></div>`;
+
+PAGES.today = async () => {
+  page('today', `<h2 class="ph">Today</h2><p class="pdate">${new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p><div id="today-body"><p class="loading">Loading…</p></div>`);
+  const T = await loadTopics();
+  const d = today();
+  const dayNum = Math.floor(Date.parse(d) / 86400000);
+  const r = parseRef(T.daily[dayNum % T.daily.length]);
+  const vs = r ? await versesOf(r) : [];
+  if (cur.page !== 'today') return;
+  $('#today-body').innerHTML = `
+    <section class="card verse-day">
+      <p class="eyebrow">Verse for today</p>
+      <blockquote>${vs.map((v) => esc(v.t)).join(' ')}</blockquote>
+      <p class="vref">${refLink(r, T.daily[dayNum % T.daily.length])} · ${esc(firstTr(r.id))}</p>
+    </section>
+    <div id="plan-today"></div>
+    <div class="two">
+      <section class="card"><p class="eyebrow">Word for today</p><p class="sub">A message from a Hebrew or Messianic teacher</p><div id="vid-word">${E().enabled ? '<p class="loading">Loading…</p>' : yt(null)}</div></section>
+      <section class="card"><p class="eyebrow">Worship · שִׁיר</p><p class="sub">A song of praise sung in Hebrew</p><div id="vid-worship">${E().enabled ? '<p class="loading">Loading…</p>' : yt(null)}</div></section>
+    </div>`;
+  renderPlanToday();
+  if (E().enabled) {
+    const stop = E().watch('videos:forDay', { date: new Date().toISOString().slice(0, 10) }, (x) => {
+      if (cur.page !== 'today' || !$('#vid-word')) return stop?.();
+      $('#vid-word').innerHTML = yt(x.word); $('#vid-worship').innerHTML = yt(x.worship);
+    }, () => { if ($('#vid-word')) { $('#vid-word').innerHTML = yt(null); $('#vid-worship').innerHTML = yt(null); } });
+  }
+};
+async function renderPlanToday() {
+  const box = $('#plan-today'); if (!box) return;
+  if (!myPlans.length) { box.innerHTML = ''; return; }
+  const P = await loadPlans();
+  box.innerHTML = myPlans.map((mp) => {
+    const p = P.find((x) => x.id === mp.planId); if (!p) return '';
+    const next = nextDay(p, mp);
+    if (!next) return `<section class="card plan-mini"><p class="eyebrow">${esc(p.name)}</p><p>Plan complete. Well done!</p></section>`;
+    return `<section class="card plan-mini"><p class="eyebrow">${esc(p.name)} · Day ${next}</p><p class="reading">${readingLinks(p.days[next - 1])}</p>
+      <div class="row"><button class="pill solid" data-day="${p.id}|${next}">Mark day ${next} done</button><a class="pill" href="#plan/${p.id}">Open plan</a></div></section>`;
+  }).join('');
+}
+
+// ------------------------------------------------------------ Study plans
+const nextDay = (p, mp) => { const done = new Set(mp.done); for (let i = 1; i <= p.days.length; i++) if (!done.has(i)) return i; return 0; };
+const rangeLabel = ([id, a, z]) => `${bookName(id)} ${a}${z > a ? '–' + z : ''}`;
+const readingLinks = (day) => day.map((r) => `<a href="#${r[0]}/_/${r[1]}">${esc(rangeLabel(r))}</a>`).join(', ');
+
+PAGES.plans = async () => {
+  page('plans', `<h2 class="ph">Study Plans</h2><p class="pintro">Read with purpose, a little each day. Tick off each day as you go; your progress is saved to your account.</p><div id="plans-body"><p class="loading">Loading…</p></div>`);
+  const P = await loadPlans();
+  if (cur.page !== 'plans') return;
+  $('#plans-body').innerHTML = `<div class="grid">${P.map((p) => {
+    const mp = myPlans.find((x) => x.planId === p.id);
+    const pct = mp ? Math.round((mp.done.length / p.days.length) * 100) : 0;
+    return `<a class="card plan" href="#plan/${p.id}">
+      <p class="eyebrow">${p.days.length} days${mp ? ` · ${pct}% done` : ''}</p>
+      <h3>${esc(p.name)}</h3><p>${esc(p.about)}</p>
+      ${mp ? `<div class="bar2"><i style="width:${pct}%"></i></div>` : ''}</a>`;
+  }).join('')}</div>`;
+};
+
+PAGES.plan = async ([id]) => {
+  const P = await loadPlans();
+  const p = P.find((x) => x.id === id);
+  if (!p) return PAGES.plans();
+  const mp = myPlans.find((x) => x.planId === id);
+  const done = new Set(mp ? mp.done : []);
+  const next = mp ? nextDay(p, mp) : 1;
+  page('plans', `<p class="crumb"><a href="#plans">‹ Study Plans</a></p><h2 class="ph">${esc(p.name)}</h2><p class="pintro">${esc(p.about)}</p>
+    ${me ? (mp ? `<div class="row"><span class="prog">${done.size} of ${p.days.length} days done</span><button class="pill" id="leave-plan">Leave plan</button></div><div class="bar2"><i style="width:${(done.size / p.days.length) * 100}%"></i></div>`
+                : `<button class="pill solid" id="start-plan">Start this plan</button>`)
+          : needAccount('Study plans')}
+    <ol class="days">${p.days.map((day, i) => `<li class="${done.has(i + 1) ? 'done' : ''}${mp && i + 1 === next ? ' next' : ''}">
+      <label><input type="checkbox" data-day="${p.id}|${i + 1}" ${done.has(i + 1) ? 'checked' : ''} ${me ? '' : 'disabled'}><span class="dn">Day ${i + 1}</span></label>
+      <span class="reading">${readingLinks(day)}</span></li>`).join('')}</ol>`);
+  $('#start-plan')?.addEventListener('click', () => act(() => E().mutation('plans:start', { planId: id })));
+  $('#leave-plan')?.addEventListener('click', () => { if (confirm(`Leave “${p.name}” and clear your progress?`)) act(() => E().mutation('plans:leave', { planId: id })); });
+  if (mp && next) document.querySelector('.days li.next')?.scrollIntoView({ block: 'center' });
+};
+
+document.addEventListener('change', (e) => {
+  const cb = e.target.closest('input[data-day]'); if (!cb) return;
+  const [planId, day] = cb.dataset.day.split('|');
+  act(() => E().mutation('plans:setDay', { planId, day: +day, done: cb.checked }), () => { cb.checked = !cb.checked; });
+});
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-day]'); if (!b) return;
+  const [planId, day] = b.dataset.day.split('|'); b.disabled = true;
+  act(() => E().mutation('plans:setDay', { planId, day: +day, done: true }), () => { b.disabled = false; });
+});
+
+// ------------------------------------------------------------ Topics
+PAGES.topics = async () => {
+  page('topics', `<h2 class="ph">Topics</h2><p class="pintro">Explore what scripture says about a subject. Each topic gathers passages from across the collection.</p><div id="topics-body"><p class="loading">Loading…</p></div>`);
+  const T = await loadTopics();
+  if (cur.page !== 'topics') return;
+  $('#topics-body').innerHTML = `<div class="grid">${T.topics.map((t) => `<a class="card topic" href="#topic/${t.id}"><p class="he" lang="he" dir="rtl">${esc(t.he)}</p><h3>${esc(t.name)}</h3><p>${esc(t.blurb)}</p></a>`).join('')}</div>
+    <div class="card soft ask-topic"><p>Looking for something else?</p><button class="pill solid" data-ask-topic="">Ask about any subject</button></div>`;
+};
+PAGES.topic = async ([id]) => {
+  const T = await loadTopics();
+  const t = T.topics.find((x) => x.id === id);
+  if (!t) return PAGES.topics();
+  page('topics', `<p class="crumb"><a href="#topics">‹ Topics</a></p><p class="he big" lang="he" dir="rtl">${esc(t.he)}</p><h2 class="ph">${esc(t.name)}</h2><p class="pintro">${esc(t.blurb)}</p><div id="topic-body"><p class="loading">Loading passages…</p></div>`);
+  const parts = await Promise.all(t.refs.map(async (ref) => { const r = parseRef(ref); return r ? { ref, r, vs: await versesOf(r) } : null; }));
+  if (cur.page !== 'topics' || !$('#topic-body')) return;
+  $('#topic-body').innerHTML = parts.filter(Boolean).map(({ ref, r, vs }) => `<section class="card passage"><p class="vref">${refLink(r, ref)}</p><p class="ptext">${vs.map((v) => `<sup>${v.n}</sup>${esc(v.t)}`).join(' ')}</p></section>`).join('')
+    + `<div class="row"><button class="pill solid" data-ask-topic="${esc(t.name)}">Ask about ${esc(t.name.toLowerCase())}</button></div>`;
+};
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ask-topic]'); if (!b) return;
+  openAsk(); const s = b.dataset.askTopic;
+  $('#ask-in').value = s ? `What does scripture teach about ${s.toLowerCase()}? ` : ''; $('#ask-in').focus();
+});
+
+// ------------------------------------------------------------ Notes
+PAGES.notes = () => {
+  if (!me) return page('notes', `<h2 class="ph">My Notes</h2><p class="pintro">Write your own notes on any verse: double-tap a verse while reading, then use “My note”.</p>${needAccount('Notes')}`);
+  const groups = {};
+  for (const n of myNotes) (groups[n.bookId] ??= []).push(n);
+  const books = Object.keys(groups).sort((a, b) => bookOrder(a) - bookOrder(b));
+  page('notes', `<h2 class="ph">My Notes</h2><p class="pintro">${myNotes.length ? `${myNotes.length} note${myNotes.length === 1 ? '' : 's'}, in the book’s order.` : 'No notes yet. Double-tap any verse while reading, then write in “My note”.'}</p>
+    ${books.map((id) => `<h3 class="nh">${esc(bookName(id))}</h3>${groups[id].sort((a, b) => a.chapter - b.chapter || a.verse - b.verse).map((n) => `
+      <section class="card note"><p class="vref"><a href="#${id}/_/${n.chapter}" data-ref="${id}|${n.chapter}|${n.verse}">${esc(bookName(id))} ${n.chapter}:${n.verse}</a><span class="when">${new Date(n.updatedAt).toLocaleDateString()}</span></p>
+      <p class="ntext">${esc(n.text).replace(/\n/g, '<br>')}</p></section>`).join('')}`).join('')}`);
+};
+/** The "My note" box at the bottom of the verse breakdown drawer. */
+function noteBox(v) {
+  const box = document.createElement('div');
+  box.className = 'mynote';
+  const n = myNotes.find((x) => x.bookId === cur.book && x.chapter === cur.ch && x.verse === v);
+  if (!E().enabled) { box.innerHTML = ''; return box; }
+  if (!me) { box.innerHTML = `<h4>My note</h4><p class="body">Sign in to write your own notes on this verse.</p><button class="pill" data-signin>Sign in</button>`; return box; }
+  const at = { bookId: cur.book, chapter: cur.ch, verse: v };
+  box.innerHTML = `<h4>My note</h4><textarea rows="3" maxlength="5000" placeholder="Write a thought, a prayer, a question…">${esc(n ? n.text : '')}</textarea><div class="row"><button class="pill solid" data-save>Save note</button>${n ? '<button class="pill" data-del>Delete</button>' : ''}<span class="saved" aria-live="polite"></span></div>`;
+  const ta = box.querySelector('textarea'), msg = box.querySelector('.saved');
+  box.querySelector('[data-save]').onclick = () => act(() => E().mutation('notes:save', { ...at, text: ta.value }), null, () => { msg.textContent = ta.value.trim() ? 'Saved' : 'Deleted'; });
+  box.querySelector('[data-del]')?.addEventListener('click', () => act(() => E().mutation('notes:save', { ...at, text: '' }), null, () => { ta.value = ''; msg.textContent = 'Deleted'; }));
+  return box;
+}
+// Wrap the reader's verse breakdown so it always ends with the note box.
+const _verseInsight = verseInsight;
+verseInsight = async function (v) {
+  const p = _verseInsight(v);
+  const body = $('#ins-body');
+  body.querySelector('.mynote')?.remove();
+  body.appendChild(noteBox(v));
+  return p;
+};
+// Pencil marks on verses that have a note.
+function markNotes() {
+  if (!cur.book) return;
+  document.querySelectorAll('.text .v').forEach((el) => {
+    const has = myNotes.some((n) => n.bookId === cur.book && n.chapter === cur.ch && n.verse === +el.dataset.v);
+    el.classList.toggle('has-note', has);
+  });
+}
+new MutationObserver(markNotes).observe($('#main'), { childList: true });
+
+// ------------------------------------------------------------ Accounts
+function acctButton() {
+  const b = $('#acct-btn'); if (!b) return;
+  b.hidden = !E().enabled;
+  b.textContent = me ? (me.name || me.email).trim().charAt(0).toUpperCase() : 'Sign in';
+  b.classList.toggle('avatar', !!me);
+  b.setAttribute('aria-label', me ? `Account: ${me.name || me.email}` : 'Sign in');
+}
+function openSignIn(mode = 'signIn', reason = '') {
+  const m = $('#signin');
+  m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="si-h">
+    <button class="x" data-x aria-label="Close">×</button>
+    <picture><source srcset="/brand/mark-dark.svg" media="(prefers-color-scheme: dark)"><img class="smark" src="/brand/mark.svg" alt=""></picture>
+    <h3 id="si-h">${mode === 'signUp' ? 'Create your account' : 'Welcome back'}</h3>
+    ${reason ? `<p class="sreason">${esc(reason)}</p>` : ''}
+    <form id="si-form">
+      ${mode === 'signUp' ? '<label>Your name<input name="name" autocomplete="name" required maxlength="80"></label>' : ''}
+      <label>Email<input name="email" type="email" autocomplete="email" required></label>
+      <label>Password<input name="password" type="password" autocomplete="${mode === 'signUp' ? 'new-password' : 'current-password'}" minlength="8" required></label>
+      ${mode === 'signUp' ? '<p class="hintx">At least 8 characters.</p>' : ''}
+      <p class="err" id="si-err" role="alert"></p>
+      <button class="pill solid wide" id="si-go">${mode === 'signUp' ? 'Create account' : 'Sign in'}</button>
+    </form>
+    <p class="swap">${mode === 'signUp' ? 'Already have an account? <a href="javascript:void(0)" data-mode="signIn">Sign in</a>' : 'New here? <a href="javascript:void(0)" data-mode="signUp">Create an account</a>'}</p>
+  </div>`;
+  m.hidden = false;
+  m.querySelector('input').focus();
+  m.querySelector('[data-x]').onclick = closeSignIn;
+  m.querySelector('[data-mode]').onclick = (e) => openSignIn(e.target.dataset.mode, reason);
+  $('#si-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    $('#si-go').disabled = true; $('#si-err').textContent = '';
+    try { await E().signIn(mode, f); closeSignIn(); toast(mode === 'signUp' ? `Welcome, ${f.name.split(' ')[0]}!` : 'Signed in'); }
+    catch (err) { $('#si-err').textContent = err.message; $('#si-go').disabled = false; }
+  };
+}
+function closeSignIn() { $('#signin').hidden = true; $('#signin').innerHTML = ''; }
+function openAcctMenu() {
+  const m = $('#acct-menu');
+  if (!m.hidden) { m.hidden = true; return; }
+  m.innerHTML = `<p class="who"><b>${esc(me.name || 'Signed in')}</b><br>${esc(me.email)}</p>
+    <a href="#notes">My notes</a><a href="#plans">My study plans</a>
+    <button data-out>Sign out</button><button class="danger" data-delete>Delete account</button>`;
+  m.hidden = false;
+  m.querySelector('[data-out]').onclick = async () => { m.hidden = true; await E().signOut(); toast('Signed out'); };
+  m.querySelector('[data-delete]').onclick = async () => {
+    m.hidden = true;
+    if (!confirm('Delete your account and all your notes and plan progress? This cannot be undone.')) return;
+    await act(() => E().mutation('users:deleteAccount', {}), null, async () => { await E().signOut(); toast('Your account was deleted'); });
+  };
+}
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-signin]')) { e.preventDefault(); openSignIn('signIn'); return; }
+  if (e.target.closest('#acct-btn')) { me ? openAcctMenu() : openSignIn('signIn'); return; }
+  if (!e.target.closest('#acct-menu')) $('#acct-menu').hidden = true;
+  if (e.target.id === 'signin') closeSignIn();
+  const v = e.target.closest('.vthumb');
+  if (v) v.outerHTML = `<div class="vframe"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.dataset.yt)}?autoplay=1&rel=0" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`;
+});
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#signin').hidden) closeSignIn(); });
+
+async function act(fn, onFail, onOk) {
+  try { await fn(); onOk && (await onOk()); }
+  catch (e) {
+    onFail && onFail();
+    const m = String(e && e.message || e);
+    if (/sign in/i.test(m)) openSignIn('signIn', 'Please sign in to continue.');
+    else toast(m.replace(/^.*Uncaught Error:\s*/s, '').split('\n')[0] || 'Something went wrong.', true);
+  }
+}
+function toast(msg, bad) {
+  const t = document.createElement('div'); t.className = 'toast' + (bad ? ' bad' : ''); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2600);
+}
+
+function rerender() {
+  if (cur.page && PAGES[cur.page === 'plans' && location.hash.startsWith('#plan/') ? 'plan' : cur.page]) route();
+  markNotes(); renderPlanToday();
+}
+function startWatching() {
+  unwatch.forEach((u) => u()); unwatch = [];
+  if (!E().enabled) return;
+  unwatch.push(E().watch('users:me', {}, (u) => { me = u; acctButton(); rerender(); }));
+  unwatch.push(E().watch('notes:mine', {}, (n) => { myNotes = n; markNotes(); if (cur.page === 'notes') PAGES.notes(); }));
+  unwatch.push(E().watch('plans:mine', {}, (p) => { myPlans = p; if (cur.page === 'plans' || cur.page === 'today') rerender(); }));
+}
+
+// ------------------------------------------------------------ routing
+function route() {
+  const [name, ...rest] = location.hash.slice(1).split('/');
+  if (PAGES[name]) { PAGES[name](rest); return true; }
+  return false;
+}
+window.elyonRoute = route;
+document.querySelectorAll('#tabs a[data-tab="read"]').forEach((a) => a.addEventListener('click', (e) => {
+  e.preventDefault();
+  const last = sessionStorage.getItem('elyon-last');
+  location.hash = last || 'contents';
+}));
+addEventListener('hashchange', () => {
+  const id = location.hash.slice(1).split('/')[0];
+  if (IDX && IDX.books.some((b) => b.id === id)) { try { sessionStorage.setItem('elyon-last', location.hash.slice(1)); } catch {} markTab('read'); }
+  else if (['cover', 'contents', 'references', 'credits', ''].includes(id)) markTab('read');
+});
+
+function boot() {
+  acctButton();
+  if (!PAGES[location.hash.slice(1).split('/')[0]]) markTab('read');
+  if (!E().enabled) return;
+  E().onAuth((signedIn) => { if (!signedIn) { me = null; myNotes = []; myPlans = []; acctButton(); rerender(); } startWatching(); });
+}
+if (window.Elyon) boot(); else addEventListener('elyon-ready', boot, { once: true });

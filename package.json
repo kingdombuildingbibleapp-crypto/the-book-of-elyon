@@ -4,6 +4,24 @@
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
-    "@netlify/blobs": "^11.1.9"
+    "@auth/core": "^0.41.3",
+    "@convex-dev/auth": "^0.0.95",
+    "@netlify/blobs": "^11.1.9",
+    "convex": "^1.50.0"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
+    "@types/node": "^26.6.6",
+    "convex-test": "^0.0.71",
+    "esbuild": "^0.28.2",
+    "jose": "^6.2.17",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "build:client": "esbuild src/elyon-client.js --bundle --minify --format=iife --target=es2020 --outfile=public/js/elyon-client.js",
+    "build": "python3 build.py && npm run build:client",
+    "test": "vitest run",
+    "typecheck": "tsc -p convex --noEmit"
   }
 }

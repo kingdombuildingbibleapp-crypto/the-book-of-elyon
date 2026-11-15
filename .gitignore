@@ -1,5 +1,7 @@
-public/data/
+.auth-keys.json
+.env.local
+.netlify/
 __pycache__/
 intros/
 node_modules/
-.netlify/
+public/data/
