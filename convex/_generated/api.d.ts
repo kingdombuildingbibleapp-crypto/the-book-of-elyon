@@ -10,6 +10,8 @@
 
 import type * as ResendOTPPasswordReset from "../ResendOTPPasswordReset.js";
 import type * as auth from "../auth.js";
+import type * as billing from "../billing.js";
+import type * as stripe from "../stripe.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -28,6 +30,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   ResendOTPPasswordReset: typeof ResendOTPPasswordReset;
   auth: typeof auth;
+  billing: typeof billing;
+  stripe: typeof stripe;
   crons: typeof crons;
   http: typeof http;
   "lib/auth": typeof lib_auth;

@@ -5,7 +5,7 @@
 // Each breakdown is generated once and cached in Netlify Blobs, then served
 // to every later reader, so a verse is only paid for once.
 import { getStore } from "@netlify/blobs";
-import { client, MODEL, FALLBACK, COLLECTION_CONTEXT, textOf, json, errorResponse } from "../lib/claude.mjs";
+import { client, MODEL, FALLBACK, COLLECTION_CONTEXT, textOf, json, errorResponse, plusGate } from "../lib/claude.mjs";
 
 const CACHE_VERSION = "v1"; // bump to regenerate every cached breakdown
 
@@ -80,6 +80,9 @@ export default async (req) => {
   } catch {
     return json(400, { error: "Invalid request." });
   }
+
+  const denied = await plusGate(req);
+  if (denied) return denied;
 
   const kind = b?.kind === "deeper" ? "deeper" : "simple";
   const a = {

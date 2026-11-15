@@ -12,7 +12,8 @@
     "@netlify/blobs": "^11.1.9",
     "@oslojs/crypto": "^1.0.1",
     "convex": "^1.50.0",
-    "resend": "^6.38.1"
+    "resend": "^6.38.1",
+    "stripe": "^23.1.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",

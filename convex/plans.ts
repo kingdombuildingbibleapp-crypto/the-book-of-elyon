@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { requireUserId } from "./lib/auth";
 import { PLAN_DAYS } from "./planCatalog";
+import { requirePlus } from "./billing";
 
 function checkPlan(planId: string): number {
   const days = PLAN_DAYS[planId];
@@ -41,6 +42,7 @@ export const start = mutation({
   handler: async (ctx, { planId }) => {
     const userId = await requireUserId(ctx);
     checkPlan(planId);
+    await requirePlus(ctx, userId);
     const existing = await ctx.db
       .query("planEnrollments")
       .withIndex("by_userId_and_planId", (q) => q.eq("userId", userId).eq("planId", planId))
@@ -57,6 +59,7 @@ export const setDay = mutation({
   handler: async (ctx, { planId, day, done }) => {
     const userId = await requireUserId(ctx);
     const total = checkPlan(planId);
+    await requirePlus(ctx, userId);
     if (!Number.isInteger(day) || day < 1 || day > total) throw new Error("Unknown day.");
     const enrolled = await ctx.db
       .query("planEnrollments")

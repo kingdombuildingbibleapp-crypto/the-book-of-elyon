@@ -4,6 +4,7 @@
 // (Site configuration → Environment variables). Never put it in the page.
 import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "node:fs";
+import { ConvexHttpClient } from "convex/browser";
 
 // Same model as the Kingdom Building Study Bible.
 export const MODEL = "claude-sonnet-5-5";
@@ -49,4 +50,25 @@ export function errorResponse(err) {
   if (err instanceof Anthropic.APIError) return json(502, { error: "The AI service had a problem. Please try again." });
   if (err instanceof Anthropic.APIConnectionError) return json(502, { error: "Could not reach the AI service. Please try again." });
   return json(500, { error: "Something went wrong." });
+}
+
+// Elyon Plus: Ask Me and verse breakdowns are for readers who bought the
+// upgrade. The page sends the reader's sign-in token; Convex checks it and
+// looks up the purchase (convex/billing.ts). Returns an error Response, or
+// null when the reader may continue.
+const CONVEX_URL = process.env.CONVEX_URL || "https://resolute-anteater-719.convex.cloud";
+export async function plusGate(req) {
+  const m = /^Bearer\s+(\S+)$/i.exec(req.headers.get("authorization") || "");
+  if (!m) return json(401, { error: "Sign in with Elyon Plus to use this.", plus: false });
+  try {
+    const convex = new ConvexHttpClient(CONVEX_URL);
+    convex.setAuth(m[1]);
+    if (await convex.query("billing:hasPlus", {})) return null;
+    return json(402, { error: "This is part of Elyon Plus.", plus: false });
+  } catch (err) {
+    // An expired or invalid token: the page refreshes it and tries again.
+    if (/auth|token|jwt/i.test(String(err && err.message))) return json(401, { error: "Please sign in again.", plus: false });
+    console.error("plus check failed", err);
+    return json(502, { error: "Could not check your Elyon Plus access. Please try again." });
+  }
 }

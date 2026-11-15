@@ -109,6 +109,12 @@ const Elyon = {
     signedIn = false;
     notify();
   },
+  /** The current sign-in token (for the site's AI functions), or null. */
+  token: () => (signedIn ? token : null),
+  /** A fresh token after the server said the old one expired. */
+  refreshToken: async () => (signedIn ? await refresh() : null),
+  /** Calls a Convex action (e.g. "stripe:checkout"). */
+  action: (fn, args) => (client ? client.action(fn, args || {}) : Promise.reject(new Error("Not available"))),
   /** Live query: calls cb with every new result; returns an unsubscribe function. */
   watch(fn, args, cb, onError) {
     if (!client) return () => {};

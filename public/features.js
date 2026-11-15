@@ -8,6 +8,18 @@ let TOPICS = null, PLANS = null;
 let me = null;               // { name, email } when signed in
 let myNotes = [];            // [{ bookId, chapter, verse, text, updatedAt }]
 let myPlans = [];            // [{ planId, startedAt, done: [day] }]
+let plus = false;            // has Elyon Plus (checked again on the server)
+let plusConfirmed = '';      // Checkout session already confirmed
+let plusKnown = false;       // hasPlus has answered at least once since sign-in
+// In the Android and iOS apps, store rules forbid selling the upgrade
+// through our own checkout: the apps unlock it by signing in instead.
+const isApp = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const locked = () => E().enabled && !plus;
+function plusCard(what) {
+  return `<div class="plus-card"><p class="pk">✦ Elyon Plus</p><p>${esc(what)}</p>${isApp()
+    ? `<p>Sign in with an account that has Elyon Plus.</p>${me ? '' : '<button class="pill solid" data-signin>Sign in</button>'}`
+    : '<a class="pill solid" href="#plus">Unlock everything for $1.99</a>'}</div>`;
+}
 let unwatch = [];
 const E = () => window.Elyon || { enabled: false, isSignedIn: () => false };
 
@@ -81,6 +93,11 @@ PAGES.today = async () => {
   if (E().enabled) {
     const stop = E().watch('videos:forDay', { date: new Date().toISOString().slice(0, 10) }, (x) => {
       if (cur.page !== 'today' || !$('#vid-word')) return stop?.();
+      if (x.locked) {
+        $('#vid-word').innerHTML = plusCard('A daily message from a Hebrew or Messianic teacher.');
+        $('#vid-worship').innerHTML = plusCard('A daily song of worship sung in Hebrew.');
+        return;
+      }
       $('#vid-word').innerHTML = yt(x.word); $('#vid-worship').innerHTML = yt(x.worship);
     }, () => { if ($('#vid-word')) { $('#vid-word').innerHTML = yt(null); $('#vid-worship').innerHTML = yt(null); } });
   }
@@ -126,10 +143,10 @@ PAGES.plan = async ([id]) => {
   const next = mp ? nextDay(p, mp) : 1;
   page('plans', `<p class="crumb"><a href="#plans">‹ Study Plans</a></p><h2 class="ph">${esc(p.name)}</h2><p class="pintro">${esc(p.about)}</p>
     ${me ? (mp ? `<div class="row"><span class="prog">${done.size} of ${p.days.length} days done</span><button class="pill" id="leave-plan">Leave plan</button></div><div class="bar2"><i style="width:${(done.size / p.days.length) * 100}%"></i></div>`
-                : `<button class="pill solid" id="start-plan">Start this plan</button>`)
+                : plus ? `<button class="pill solid" id="start-plan">Start this plan</button>` : plusCard('Start study plans and tick off each day as you read.'))
           : needAccount('Study plans')}
     <ol class="days">${p.days.map((day, i) => `<li class="${done.has(i + 1) ? 'done' : ''}${mp && i + 1 === next ? ' next' : ''}">
-      <label><input type="checkbox" data-day="${p.id}|${i + 1}" ${done.has(i + 1) ? 'checked' : ''} ${me ? '' : 'disabled'}><span class="dn">Day ${i + 1}</span></label>
+      <label><input type="checkbox" data-day="${p.id}|${i + 1}" ${done.has(i + 1) ? 'checked' : ''} ${me && plus ? '' : 'disabled'}><span class="dn">Day ${i + 1}</span></label>
       <span class="reading">${readingLinks(day)}</span></li>`).join('')}</ol>`);
   $('#start-plan')?.addEventListener('click', () => act(() => E().mutation('plans:start', { planId: id })));
   $('#leave-plan')?.addEventListener('click', () => { if (confirm(`Leave “${p.name}” and clear your progress?`)) act(() => E().mutation('plans:leave', { planId: id })); });
@@ -177,6 +194,7 @@ PAGES.notes = () => {
   const groups = {};
   for (const n of myNotes) (groups[n.bookId] ??= []).push(n);
   const books = Object.keys(groups).sort((a, b) => bookOrder(a) - bookOrder(b));
+  if (!plus && !myNotes.length) return page('notes', `<h2 class="ph">My Notes</h2><p class="pintro">Write your own notes on any verse, saved to your account.</p>${plusCard('Write your own notes on any verse: a thought, a prayer, a question.')}`);
   page('notes', `<h2 class="ph">My Notes</h2><p class="pintro">${myNotes.length ? `${myNotes.length} note${myNotes.length === 1 ? '' : 's'}, in the book’s order.` : 'No notes yet. Double-tap any verse while reading, then write in “My note”.'}</p>
     ${books.map((id) => `<h3 class="nh">${esc(bookName(id))}</h3>${groups[id].sort((a, b) => a.chapter - b.chapter || a.verse - b.verse).map((n) => `
       <section class="card note"><p class="vref"><a href="#${id}/_/${n.chapter}" data-ref="${id}|${n.chapter}|${n.verse}">${esc(bookName(id))} ${n.chapter}:${n.verse}</a><span class="when">${new Date(n.updatedAt).toLocaleDateString()}</span></p>
@@ -189,6 +207,8 @@ function noteBox(v) {
   const n = myNotes.find((x) => x.bookId === cur.book && x.chapter === cur.ch && x.verse === v);
   if (!E().enabled) { box.innerHTML = ''; return box; }
   if (!me) { box.innerHTML = `<h4>My note</h4><p class="body">Sign in to write your own notes on this verse.</p><button class="pill" data-signin>Sign in</button>`; return box; }
+  // Without Plus the breakdown card above already explains the upgrade; just show any old note.
+  if (!plus) { box.innerHTML = n ? `<h4>My note</h4><p class="body">${esc(n.text)}</p>` : ''; return box; }
   const at = { bookId: cur.book, chapter: cur.ch, verse: v };
   box.innerHTML = `<h4>My note</h4><textarea rows="3" maxlength="5000" placeholder="Write a thought, a prayer, a question…">${esc(n ? n.text : '')}</textarea><div class="row"><button class="pill solid" data-save>Save note</button>${n ? '<button class="pill" data-del>Delete</button>' : ''}<span class="saved" aria-live="polite"></span></div>`;
   const ta = box.querySelector('textarea'), msg = box.querySelector('.saved');
@@ -199,12 +219,30 @@ function noteBox(v) {
 // Wrap the reader's verse breakdown so it always ends with the note box.
 const _verseInsight = verseInsight;
 verseInsight = async function (v) {
-  const p = _verseInsight(v);
+  let p;
+  if (locked()) {
+    // Free readers see the verse and what Elyon Plus adds, without calling the AI.
+    document.querySelectorAll('.v.sel').forEach((x) => x.classList.remove('sel')); document.getElementById('v' + v)?.classList.add('sel');
+    const b = IDX.books.find((x) => x.id === cur.book), req = verseRequest(v, 'simple');
+    openDrawer('ins');
+    $('#ins-body').innerHTML = `<div class="ref">${esc(b.name)} ${cur.ch}:${v} · ${esc(cur.tr)}</div><blockquote>${esc(req.verseText)}</blockquote>
+      ${plusCard('Double-tap any verse for a plain-language explanation, why it matters, related passages and a deeper look.')}`;
+  } else p = _verseInsight(v);
   const body = $('#ins-body');
   body.querySelector('.mynote')?.remove();
   body.appendChild(noteBox(v));
   return p;
 };
+// Ask Me is part of Elyon Plus.
+const _openAsk = openAsk;
+openAsk = function () {
+  if (!locked()) { $('#ask-form').style.display = ''; return _openAsk(); }
+  openDrawer('ask');
+  $('#ask-form').style.display = 'none';
+  $('#msgs').innerHTML = `<p class="welcome">Ask anything about a subject, a verse, a book, or a word, and get answers that point you to passages you can read here.</p>${plusCard('Ask Me questions about any verse, book or subject.')}`;
+};
+$('#ask-btn').onclick = () => ($('#ask').classList.contains('open') ? closeDrawer() : openAsk());
+
 // Pencil marks on verses that have a note.
 function markNotes() {
   if (!cur.book) return;
@@ -214,6 +252,41 @@ function markNotes() {
   });
 }
 new MutationObserver(markNotes).observe($('#main'), { childList: true });
+
+// ------------------------------------------------------------ Elyon Plus
+PAGES.plus = async ([sub, sessionId]) => {
+  if (sub === 'thanks' && sessionId) {
+    page('plus', `<div class="plus-hero"><p class="he big" lang="he" dir="rtl" style="text-align:center">תּוֹדָה</p><h2 class="ph">Thank you!</h2><p class="pintro" id="plus-msg">${me ? 'Confirming your payment…' : 'Signing you in…'}</p></div>`);
+    if (!me || plusConfirmed === sessionId) { if (plus) $('#plus-msg').textContent = 'Elyon Plus is unlocked. Enjoy!'; return; }
+    plusConfirmed = sessionId;
+    try {
+      const ok = await E().action('stripe:confirm', { sessionId });
+      $('#plus-msg').innerHTML = ok || plus ? 'Elyon Plus is unlocked. <a href="#today">Go to Today</a>' : 'Your payment is still being processed. Elyon Plus will unlock within a few minutes.';
+    } catch { $('#plus-msg').textContent = 'Your payment is being processed. Elyon Plus will unlock within a few minutes.'; }
+    return;
+  }
+  const items = [
+    ['Ask Me', 'Ask questions about any verse, book or subject, with answers that point you to passages.'],
+    ['Verse breakdowns', 'Double-tap any verse for its meaning in plain words, why it matters, related passages and a deeper look.'],
+    ['Word for Today and Hebrew worship', 'A daily message from a Hebrew or Messianic teacher and a song of praise sung in Hebrew.'],
+    ['Study plans', 'Eight plans, from the Gospels in 30 days to the whole book in a year, with your progress saved.'],
+    ['My Notes', 'Write your own notes on any verse, on every device.'],
+  ];
+  let action;
+  if (!E().enabled) action = '<p class="pintro">Elyon Plus will be available soon.</p>';
+  else if (plus) action = '<p class="pill solid" style="display:inline-block">✓ You have Elyon Plus</p>';
+  else if (isApp()) action = `<p class="pintro">Already have Elyon Plus? Sign in with that account to unlock it here.</p>${me ? '' : '<button class="pill solid" data-signin>Sign in</button>'}`;
+  else action = `<button class="pill solid" id="buy-plus" style="font-size:16px;padding:12px 28px">${me ? 'Unlock Elyon Plus for $1.99' : 'Create an account to unlock'}</button><p class="plus-free">One payment, yours for life. No subscription. Secure checkout by Stripe.</p>`;
+  page('plus', `<div class="plus-hero"><p class="eyebrow">✦ Elyon Plus</p><h2 class="ph">Go deeper into the Book of Elyon</h2>
+      ${isApp() ? '' : '<p class="price">$1.99</p><p class="once">once, for life</p>'}${action}</div>
+    <ul class="plus-list">${items.map(([t, d]) => `<li><b>${esc(t)}</b>${esc(d)}</li>`).join('')}</ul>
+    <p class="plus-free">Always free: all 82 books in every translation, the book introductions, Topics and the Verse for Today.</p>`);
+  $('#buy-plus')?.addEventListener('click', async (e) => {
+    if (!me) return openSignIn('signUp', 'Create a free account first, so Elyon Plus stays with you on every device.');
+    e.target.disabled = true; e.target.textContent = 'Opening secure checkout…';
+    await act(async () => { location.href = await E().action('stripe:checkout', {}); }, () => { e.target.disabled = false; e.target.textContent = 'Unlock Elyon Plus for $1.99'; });
+  });
+};
 
 // ------------------------------------------------------------ Privacy and Terms
 // Required by the app stores. Keep in step with what the site really does.
@@ -331,7 +404,7 @@ function openAcctMenu() {
   const m = $('#acct-menu');
   if (!m.hidden) { m.hidden = true; return; }
   m.innerHTML = `<p class="who"><b>${esc(me.name || 'Signed in')}</b><br>${esc(me.email)}</p>
-    <a href="#notes">My notes</a><a href="#plans">My study plans</a>
+    <a href="#plus">${plus ? '✦ Elyon Plus ✓' : '✦ Get Elyon Plus'}</a><a href="#notes">My notes</a><a href="#plans">My study plans</a>
     <button data-out>Sign out</button><button class="danger" data-delete>Delete account</button>`;
   m.hidden = false;
   m.querySelector('[data-out]').onclick = async () => { m.hidden = true; await E().signOut(); toast('Signed out'); };
@@ -376,6 +449,11 @@ function startWatching() {
   unwatch.push(E().watch('users:me', {}, (u) => { me = u; acctButton(); rerender(); }));
   unwatch.push(E().watch('notes:mine', {}, (n) => { myNotes = n; markNotes(); if (cur.page === 'notes') PAGES.notes(); }));
   unwatch.push(E().watch('plans:mine', {}, (p) => { myPlans = p; if (cur.page === 'plans' || cur.page === 'today') rerender(); }));
+  unwatch.push(E().watch('billing:hasPlus', {}, (h) => {
+    if (h && !plus && plusKnown && cur.page !== 'plus') toast('✦ Elyon Plus is unlocked');
+    plus = h; plusKnown = true; rerender();
+    if ($('#ask').classList.contains('open')) openAsk();
+  }));
 }
 
 // ------------------------------------------------------------ routing
@@ -400,6 +478,6 @@ function boot() {
   acctButton();
   if (!PAGES[location.hash.slice(1).split('/')[0]]) markTab('read');
   if (!E().enabled) return;
-  E().onAuth((signedIn) => { if (!signedIn) { me = null; myNotes = []; myPlans = []; acctButton(); rerender(); } startWatching(); });
+  E().onAuth((signedIn) => { if (!signedIn) { me = null; myNotes = []; myPlans = []; plus = false; plusKnown = false; acctButton(); rerender(); } startWatching(); });
 }
 if (window.Elyon) boot(); else addEventListener('elyon-ready', boot, { once: true });

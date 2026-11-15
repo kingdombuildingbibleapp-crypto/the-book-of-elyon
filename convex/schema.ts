@@ -21,6 +21,18 @@ export default defineSchema({
     .index("by_userId_and_updatedAt", ["userId", "updatedAt"])
     .index("by_userId_and_bookId_and_chapter_and_verse", ["userId", "bookId", "chapter", "verse"]),
 
+  // Elyon Plus purchases (billing.ts), one row per paid Stripe Checkout.
+  purchases: defineTable({
+    userId: v.id("users"),
+    product: v.literal("plus"),
+    sessionId: v.string(),
+    amount: v.number(), // cents
+    currency: v.string(),
+    paidAt: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_sessionId", ["sessionId"]),
+
   // Study plans a reader has started (plans themselves are in planCatalog.ts).
   planEnrollments: defineTable({
     userId: v.id("users"),

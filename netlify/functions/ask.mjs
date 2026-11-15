@@ -1,7 +1,7 @@
 // "Ask Me": open conversation about a subject, verse or book.
 // Intentionally not cached — every question is different. The limits below
 // keep any one request bounded in cost.
-import { client, MODEL, FALLBACK, COLLECTION_CONTEXT, textOf, json, errorResponse } from "../lib/claude.mjs";
+import { client, MODEL, FALLBACK, COLLECTION_CONTEXT, textOf, json, errorResponse, plusGate } from "../lib/claude.mjs";
 
 const MAX_TURNS = 12;
 const MAX_CHARS = 2000;
@@ -22,6 +22,9 @@ export default async (req) => {
   } catch {
     return json(400, { error: "Invalid request." });
   }
+
+  const denied = await plusGate(req);
+  if (denied) return denied;
 
   const turns = Array.isArray(body?.turns) ? body.turns : [];
   const messages = turns

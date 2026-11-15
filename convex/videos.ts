@@ -2,6 +2,8 @@ import { v } from "convex/values";
 import { internalAction, internalMutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { hasPlusFor } from "./billing";
 
 // "Word for Today" and "Worship" on the Today page: a different video every
 // day, taken from the newest uploads of the approved YouTube channels below.
@@ -286,11 +288,13 @@ export const save = internalMutation({
 
 const dayVideo = v.union(v.null(), v.object({ youtubeId: v.string(), title: v.string(), by: v.string() }));
 
-/** A day's two videos; null where there is none yet. */
+/** A day's two videos for Elyon Plus readers; null where there is none yet. */
 export const forDay = query({
   args: { date: v.string() },
-  returns: v.object({ word: dayVideo, worship: dayVideo }),
+  returns: v.object({ word: dayVideo, worship: dayVideo, locked: v.boolean() }),
   handler: async (ctx, { date }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId || !(await hasPlusFor(ctx, userId))) return { word: null, worship: null, locked: true };
     const one = async (kind: Kind) => {
       const pick = await ctx.db
         .query("videoPicks")
@@ -304,7 +308,7 @@ export const forDay = query({
       const video = rows.find((r) => r.kind === kind);
       return video ? { youtubeId: video.youtubeId, title: video.title, by: video.by } : null;
     };
-    return { word: await one("word"), worship: await one("worship") };
+    return { word: await one("word"), worship: await one("worship"), locked: false };
   },
 });
 

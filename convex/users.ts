@@ -32,6 +32,9 @@ export const deleteAccount = mutation({
     for await (const d of ctx.db.query("planDays").withIndex("by_userId_and_planId_and_day", (q) => q.eq("userId", userId))) {
       await ctx.db.delete("planDays", d._id);
     }
+    for await (const p of ctx.db.query("purchases").withIndex("by_userId", (q) => q.eq("userId", userId))) {
+      await ctx.db.delete("purchases", p._id);
+    }
     // Sign-in records, so the email can be used again later.
     for await (const s of ctx.db.query("authSessions").withIndex("userId", (q) => q.eq("userId", userId))) {
       for await (const t of ctx.db.query("authRefreshTokens").withIndex("sessionId", (q) => q.eq("sessionId", s._id))) {

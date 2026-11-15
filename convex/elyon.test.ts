@@ -7,8 +7,9 @@ import { CHANNELS, cleanTitle, parseFeed } from "./videos";
 
 const modules = import.meta.glob("./**/*.ts");
 
-async function reader(t: ReturnType<typeof convexTest>, email = "ruth@example.com") {
+async function reader(t: ReturnType<typeof convexTest>, email = "ruth@example.com", plus = true) {
   const userId = await t.run((ctx) => ctx.db.insert("users", { email, name: "Ruth" }));
+  if (plus) await t.mutation(internal.billing.grant, { userId, sessionId: `cs_test_${email}`, amount: 199, currency: "usd" });
   const sessionId = await t.run((ctx) =>
     ctx.db.insert("authSessions", { userId, expirationTime: Date.now() + 1e9 }),
   );
@@ -104,15 +105,17 @@ test("daily picks rotate and stay fixed for the day", async () => {
     kind: "worship" as const, channelId, youtubeId: id, title: id, by: "Test", publishedAt: now - i * 1000,
   }));
   await t.mutation(internal.videos.save, { videos, now });
-  const today = await t.query(api.videos.forDay, { date: "2026-03-10" });
+  expect((await t.query(api.videos.forDay, { date: "2026-03-10" })).locked).toBe(true);
+  const { as } = await reader(t); // has Elyon Plus
+  const today = await as.query(api.videos.forDay, { date: "2026-03-10" });
   expect(today.word).toBeNull();
   expect(today.worship?.youtubeId).toBeDefined();
   // Running again keeps the same pick and fills nearby days with other videos.
   await t.mutation(internal.videos.save, { videos, now });
-  const again = await t.query(api.videos.forDay, { date: "2026-03-10" });
+  const again = await as.query(api.videos.forDay, { date: "2026-03-10" });
   expect(again.worship?.youtubeId).toBe(today.worship?.youtubeId);
   const ids = new Set(
-    await Promise.all(["2026-03-09", "2026-03-10", "2026-03-11"].map(async (d) => (await t.query(api.videos.forDay, { date: d })).worship?.youtubeId)),
+    await Promise.all(["2026-03-09", "2026-03-10", "2026-03-11"].map(async (d) => (await as.query(api.videos.forDay, { date: d })).worship?.youtubeId)),
   );
   expect(ids.size).toBe(3);
 });
@@ -127,4 +130,27 @@ test("channel page fallback reads uploads from a saved YouTube page", async () =
   console.log(got.slice(0, 5).map((v) => `${v.youtubeId} ${new Date(v.publishedAt).toISOString().slice(0, 10)} ${v.title}`).join("\n"));
   expect(got.length).toBeGreaterThan(10);
   expect(got[0].youtubeId).toMatch(/^[\w-]{11}$/);
+});
+
+test("Elyon Plus: free readers can't write notes or plans; purchase unlocks; grant is idempotent", async () => {
+  const t = convexTest(schema, modules);
+  const { as, userId } = await reader(t, "free@example.com", false);
+  expect(await as.query(api.billing.hasPlus, {})).toBe(false);
+  await expect(as.mutation(api.notes.save, { bookId: "GEN", chapter: 1, verse: 1, text: "x" })).rejects.toThrow(/Elyon Plus/);
+  await expect(as.mutation(api.plans.start, { planId: "gospels-30" })).rejects.toThrow(/Elyon Plus/);
+  await expect(as.mutation(api.plans.setDay, { planId: "gospels-30", day: 1, done: true })).rejects.toThrow(/Elyon Plus/);
+  // Deleting a note is still allowed (no-op here).
+  await as.mutation(api.notes.save, { bookId: "GEN", chapter: 1, verse: 1, text: "" });
+  await t.mutation(internal.billing.grant, { userId, sessionId: "cs_test_1", amount: 199, currency: "usd" });
+  await t.mutation(internal.billing.grant, { userId, sessionId: "cs_test_1", amount: 199, currency: "usd" });
+  expect(await t.run(async (ctx) => (await ctx.db.query("purchases").collect()).length)).toBe(1);
+  expect(await as.query(api.billing.hasPlus, {})).toBe(true);
+  await as.mutation(api.notes.save, { bookId: "GEN", chapter: 1, verse: 1, text: "x" });
+  await as.mutation(api.users.deleteAccount, {});
+  expect(await t.run(async (ctx) => (await ctx.db.query("purchases").collect()).length)).toBe(0);
+});
+
+test("signed-out readers see the daily videos as locked", async () => {
+  const t = convexTest(schema, modules);
+  expect(await t.query(api.videos.forDay, { date: "2026-03-10" })).toEqual({ word: null, worship: null, locked: true });
 });

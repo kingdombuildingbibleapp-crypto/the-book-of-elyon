@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireUserId } from "./lib/auth";
+import { requirePlus } from "./billing";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 const MAX_NOTE = 5000;
@@ -48,6 +49,8 @@ export const save = mutation({
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const bookId = cleanBookId(args.bookId);
+    // Deleting your own note is always allowed; writing one needs Elyon Plus.
+    if (args.text.trim()) await requirePlus(ctx, userId);
     checkPlace(args.chapter, args.verse);
     const text = args.text.trim().slice(0, MAX_NOTE);
     const existing = await ctx.db
