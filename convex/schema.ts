@@ -49,6 +49,17 @@ export default defineSchema({
     .index("by_kind_and_publishedAt", ["kind", "publishedAt"])
     .index("by_youtubeId", ["youtubeId"]),
 
+  // How the last refresh went for each channel (videos.ts).
+  videoStatus: defineTable({
+    channelId: v.string(),
+    kind,
+    by: v.string(),
+    source: v.string(),
+    found: v.number(),
+    error: v.string(),
+    at: v.number(),
+  }),
+
   // Which video each calendar day shows, so everyone sees the same one.
   videoPicks: defineTable({
     kind,

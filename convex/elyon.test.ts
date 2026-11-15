@@ -116,3 +116,15 @@ test("daily picks rotate and stay fixed for the day", async () => {
   );
   expect(ids.size).toBe(3);
 });
+
+test("channel page fallback reads uploads from a saved YouTube page", async () => {
+  const { readFileSync, existsSync } = await import("node:fs");
+  const f = process.env.ELYON_PAGE;
+  if (!f || !existsSync(f)) return;
+  const { parseChannelPage } = await import("./videos");
+  const ch = CHANNELS.find((c) => c.by === "Shilo Ben Hod")!;
+  const got = parseChannelPage(readFileSync(f, "utf8"), ch, Date.parse("2026-11-15T00:00:00Z"));
+  console.log(got.slice(0, 5).map((v) => `${v.youtubeId} ${new Date(v.publishedAt).toISOString().slice(0, 10)} ${v.title}`).join("\n"));
+  expect(got.length).toBeGreaterThan(10);
+  expect(got[0].youtubeId).toMatch(/^[\w-]{11}$/);
+});

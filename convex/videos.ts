@@ -117,6 +117,44 @@ export function parseFeed(xml: string, ch: Channel) {
   return out;
 }
 
+const AGE_UNITS: Record<string, number> = {
+  second: 1e3, minute: 6e4, hour: 36e5, day: 864e5, week: 6048e5, month: 2592e6, year: 31536e6,
+};
+
+/**
+ * Fallback when the feed is refused: the uploads listed on the channel's
+ * "Videos" page. Dates there are relative ("3 days ago"), so they are
+ * approximate, which is enough to order the videos newest first.
+ */
+export function parseChannelPage(html: string, ch: Channel, now: number) {
+  const out: ReturnType<typeof parseFeed> = [];
+  const seen = new Set<string>();
+  for (const block of html.split('"richItemRenderer":{"content":{"lockupViewModel"').slice(1)) {
+    const id = /\/vi\/([\w-]{11})\//.exec(block)?.[1] ?? /"videoId":"([\w-]{11})"/.exec(block)?.[1];
+    const rawTitle = /"lockupMetadataViewModel":\{"title":\{"content":"((?:[^"\\]|\\.)*)"/.exec(block)?.[1];
+    if (!id || !rawTitle || seen.has(id)) continue;
+    seen.add(id);
+    let title: string;
+    try { title = JSON.parse(`"${rawTitle}"`); } catch { continue; }
+    const age = /"accessibilityLabel":"(\d+) (second|minute|hour|day|week|month|year)s? ago"/.exec(block);
+    const publishedAt = age ? now - Number(age[1]) * AGE_UNITS[age[2]] : now - out.length * 864e5;
+    if (!ch.keep.test(title) || ch.skip.test(title)) continue;
+    if (ch.kind === "worship" && /\p{Extended_Pictographic}|\p{Regional_Indicator}|!!/u.test(title)) continue;
+    const clean = cleanTitle(title, ch.by, ch.kind);
+    if (clean) out.push({ kind: ch.kind, channelId: ch.channelId, youtubeId: id, title: clean, by: ch.by, publishedAt });
+  }
+  return out;
+}
+
+const statusValidator = v.object({
+  channelId: v.string(),
+  kind: v.union(v.literal("word"), v.literal("worship")),
+  by: v.string(),
+  source: v.string(), // "feed" | "page" | "none"
+  found: v.number(),
+  error: v.string(),
+});
+
 const videoValidator = v.object({
   kind: v.union(v.literal("word"), v.literal("worship")),
   channelId: v.string(),
@@ -126,26 +164,52 @@ const videoValidator = v.object({
   publishedAt: v.number(),
 });
 
+const HEADERS = {
+  "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+  "Accept-Language": "en-US,en;q=0.9",
+  Cookie: "CONSENT=YES+1; SOCS=CAI",
+};
+
 export const refresh = internalAction({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
     const videos: Array<typeof videoValidator.type> = [];
+    const status: Array<typeof statusValidator.type> = [];
+    const now = Date.now();
     for (const ch of CHANNELS) {
-      // The "UULF" playlist is the channel's regular uploads, without Shorts.
-      const url = `https://www.youtube.com/feeds/videos.xml?playlist_id=UULF${ch.channelId.slice(2)}`;
+      const st = { channelId: ch.channelId, kind: ch.kind, by: ch.by, source: "none", found: 0, error: "" };
+      // 1. The channel's public feed. The "UULF" playlist is its regular uploads, without Shorts.
       try {
-        const res = await fetch(url);
-        if (!res.ok) {
-          console.warn(`feed ${ch.channelId}: HTTP ${res.status}`);
-          continue;
-        }
-        videos.push(...parseFeed(await res.text(), ch));
+        const res = await fetch(`https://www.youtube.com/feeds/videos.xml?playlist_id=UULF${ch.channelId.slice(2)}`, { headers: HEADERS });
+        if (res.ok) {
+          const xml = await res.text();
+          if (xml.includes("<entry>")) {
+            const got = parseFeed(xml, ch);
+            videos.push(...got);
+            Object.assign(st, { source: "feed", found: got.length });
+          }
+        } else st.error = `feed HTTP ${res.status}`;
       } catch (e) {
-        console.warn(`feed ${ch.channelId}: ${e instanceof Error ? e.message : String(e)}`);
+        st.error = `feed ${e instanceof Error ? e.message : String(e)}`.slice(0, 200);
       }
+      // 2. If the feed was refused or empty, the channel's Videos page.
+      if (st.source === "none") {
+        try {
+          const res = await fetch(`https://www.youtube.com/channel/${ch.channelId}/videos`, { headers: HEADERS });
+          if (res.ok) {
+            const got = parseChannelPage(await res.text(), ch, now);
+            videos.push(...got);
+            Object.assign(st, { source: "page", found: got.length });
+          } else st.error += `; page HTTP ${res.status}`;
+        } catch (e) {
+          st.error += `; page ${e instanceof Error ? e.message : String(e)}`.slice(0, 200);
+        }
+      }
+      if (st.found === 0) console.warn(`videos ${ch.by} (${ch.kind}): ${st.error || "no matching uploads"}`);
+      status.push(st);
     }
-    await ctx.runMutation(internal.videos.save, { videos, now: Date.now() });
+    await ctx.runMutation(internal.videos.save, { videos, now, status });
     return null;
   },
 });
@@ -196,9 +260,13 @@ async function pickFor(ctx: MutationCtx, kind: Kind, date: string) {
 }
 
 export const save = internalMutation({
-  args: { videos: v.array(videoValidator), now: v.number() },
+  args: { videos: v.array(videoValidator), now: v.number(), status: v.optional(v.array(statusValidator)) },
   returns: v.null(),
-  handler: async (ctx, { videos, now }) => {
+  handler: async (ctx, { videos, now, status }) => {
+    if (status) {
+      for (const old of await ctx.db.query("videoStatus").take(100)) await ctx.db.delete("videoStatus", old._id);
+      for (const st of status) await ctx.db.insert("videoStatus", { ...st, at: now });
+    }
     for (const video of videos) {
       const same = await ctx.db
         .query("videos")
@@ -238,4 +306,12 @@ export const forDay = query({
     };
     return { word: await one("word"), worship: await one("worship") };
   },
+});
+
+/** How the last refresh went for each channel (for checking the setup; no personal data). */
+export const status = query({
+  args: {},
+  returns: v.array(statusValidator.extend({ at: v.number() })),
+  handler: async (ctx) =>
+    (await ctx.db.query("videoStatus").take(100)).map(({ channelId, kind, by, source, found, error, at }) => ({ channelId, kind, by, source, found, error, at })),
 });
