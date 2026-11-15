@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Book of Elyon</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -186,6 +186,16 @@ header{flex-wrap:wrap;row-gap:6px}
 #signin .swap{font:14px Inter,sans-serif;color:var(--muted);margin:14px 0 0}
 #signin .swap a{color:var(--accent)}
 #signin .forgot{margin-top:10px}
+#foot{border-top:1px solid var(--line);background:var(--panel);text-align:center;padding:22px 16px calc(22px + env(safe-area-inset-bottom));font:13px/1.6 Inter,sans-serif;color:var(--muted)}
+#foot p{margin:0 0 4px}
+#foot .fl a{color:var(--accent);text-decoration:none;margin:0 10px}
+#foot .fs{font-size:12px;max-width:560px;margin:6px auto 0}
+header{padding-top:calc(12px + env(safe-area-inset-top))}
+.legal h3{font:600 20px "EB Garamond",serif;margin:26px 0 6px}
+.legal p,.legal li{font:16px/1.65 Inter,sans-serif;color:var(--ink)}
+.legal .upd{color:var(--muted);font-size:14px}
+.legal a{color:var(--accent)}
+
 .err:empty{display:none}
 .pill{display:inline-block;border:1px solid var(--accent);color:var(--accent);background:none;text-decoration:none;padding:8px 16px;border-radius:999px;font:500 14px Inter,sans-serif;cursor:pointer}
 .pill.solid{background:var(--accent);color:var(--panel)}
@@ -259,6 +269,11 @@ header{flex-wrap:wrap;row-gap:6px}
   <nav id="nav"><input id="q" placeholder="Filter books…" aria-label="Filter books"><div id="list"></div></nav>
   <main id="main"><p class="meta">Loading…</p></main>
 </div>
+<footer id="foot">
+  <p class="fl"><a href="#privacy">Privacy</a><a href="#terms">Terms</a><a href="#credits">Credits</a></p>
+  <p>© <span id="yr">2026</span> The Book of Elyon. All rights reserved.</p>
+  <p class="fs">The scripture texts are in the public domain. The arrangement, introductions, design and software of this edition are protected by copyright.</p>
+</footer>
 <aside class="drawer" id="ask" aria-label="Ask Me">
   <div class="dhead"><h3>Ask Me</h3><button class="x" data-close="ask" aria-label="Close">×</button></div>
   <div class="dbody"><div class="msgs" id="msgs"></div></div>
@@ -482,6 +497,7 @@ $('#q').oninput=e=>renderList(e.target.value);
 $('#toc-btn').onclick=()=>{location.hash='contents';contents();};
 $('#menu').onclick=()=>$('#nav').classList.toggle('open');
 new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',document.querySelector('header').offsetHeight+'px')).observe(document.querySelector('header'));
+document.getElementById('yr').textContent=new Date().getFullYear();
 addEventListener('DOMContentLoaded',init);
 </script>
 <script src="config.js"></script>

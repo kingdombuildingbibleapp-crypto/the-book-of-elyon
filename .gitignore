@@ -5,3 +5,9 @@ __pycache__/
 intros/
 node_modules/
 public/data/
+android/app/release/
+android/.gradle/
+android/local.properties
+ios/App/build/
+*.jks
+*.keystore

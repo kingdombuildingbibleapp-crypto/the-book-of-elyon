@@ -5,6 +5,9 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
     "@auth/core": "^0.41.3",
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/ios": "^8.6.2",
     "@convex-dev/auth": "^0.0.95",
     "@netlify/blobs": "^11.1.9",
     "@oslojs/crypto": "^1.0.1",
@@ -12,6 +15,8 @@
     "resend": "^6.38.1"
   },
   "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.2",
     "@edge-runtime/vm": "^5.0.0",
     "@types/node": "^26.6.6",
     "convex-test": "^0.0.71",
