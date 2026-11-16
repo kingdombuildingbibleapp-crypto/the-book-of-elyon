@@ -35,6 +35,28 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_sessionId", ["sessionId"]),
 
+  // Site analytics (analytics.ts): anonymous counts, no personal data.
+  // One counter per day and key (e.g. "view", "visit", "page:today",
+  // "book:GEN", "event:ask"), split into a few shards so busy keys don't
+  // collide on the same document.
+  dailyCounts: defineTable({
+    date: v.string(), // "YYYY-MM-DD", UTC
+    key: v.string(),
+    shard: v.number(),
+    count: v.number(),
+  })
+    .index("by_date_and_key_and_shard", ["date", "key", "shard"])
+    .index("by_key_and_shard", ["key", "shard"]),
+  // All-time totals, same keys and shards.
+  totalCounts: defineTable({ key: v.string(), shard: v.number(), count: v.number() }).index("by_key_and_shard", [
+    "key",
+    "shard",
+  ]),
+  // A random browser id seen on a day, to count each visitor once per day.
+  visitorDays: defineTable({ date: v.string(), visitor: v.string() }).index("by_date_and_visitor", ["date", "visitor"]),
+  // When a random browser id was first seen, to count new visitors.
+  visitors: defineTable({ visitor: v.string(), firstSeen: v.string() }).index("by_visitor", ["visitor"]),
+
   // Free Elyon Plus links the owner shares (owner.ts).
   giftLinks: defineTable({
     code: v.string(),

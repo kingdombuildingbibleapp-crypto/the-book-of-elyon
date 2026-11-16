@@ -201,3 +201,31 @@ test("the built-in owner has everything without paying", async () => {
   await owner.as.mutation(api.plans.setDay, { planId: "gospels-30", day: 1, done: true });
   expect((await owner.as.query(api.videos.forDay, { date: "2026-03-10" })).locked).toBe(false);
 });
+
+test("analytics: views, one visit per visitor per day, new visitors, owner not counted, owner-only overview", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await reader(t, "arronpinkneysr@gmail.com", false);
+  const visitorA = "a".repeat(20), visitorB = "b".repeat(20);
+  await t.mutation(api.analytics.track, { visitor: visitorA, page: "today" });
+  await t.mutation(api.analytics.track, { visitor: visitorA, page: "read", book: "GEN" });
+  await t.mutation(api.analytics.track, { visitor: visitorA, page: "read", book: "GEN" });
+  await t.mutation(api.analytics.track, { visitor: visitorB, page: "read", book: "JOH" });
+  await t.mutation(api.analytics.track, { visitor: visitorB, page: "today", event: "ask" });
+  await t.mutation(api.analytics.track, { visitor: "bad!", page: "today" }); // ignored
+  await t.mutation(api.analytics.track, { visitor: visitorA, page: "nope" }); // ignored
+  await owner.as.mutation(api.analytics.track, { visitor: "c".repeat(20), page: "today" }); // owner: not counted
+  const someone = await reader(t, "x@example.com", false);
+  await expect(someone.as.query(api.analytics.overview, { now: Date.now() })).rejects.toThrow(/owner/);
+  const o = await owner.as.query(api.analytics.overview, { now: Date.now() });
+  for (const p of [o.periods.d7, o.periods.all]) {
+    expect(p.views).toBe(4);
+    expect(p.visits).toBe(2);
+    expect(p.newVisitors).toBe(2);
+    expect(p.asks).toBe(1);
+    expect(p.books).toEqual([{ key: "GEN", count: 2 }, { key: "JOH", count: 1 }]);
+  }
+  expect(o.periods.d7.pages.find((x) => x.key === "read")?.count).toBe(3);
+  expect(o.daily).toHaveLength(90);
+  expect(o.daily[89].views).toBe(4);
+  expect(o.totals.accounts).toBe(2);
+});

@@ -297,10 +297,13 @@ const giftUrl = (code) => `https://bookofelyon.org/#gift/${code}`;
 PAGES.owner = async () => {
   if (!isOwner) return page('owner', `<h2 class="ph">Owner</h2><p class="pintro">This page is only for the site owner. ${me ? '' : 'Please sign in.'}</p>`);
   page('owner', `<h2 class="ph">Owner</h2><p class="pintro">Share Elyon Plus for free. Anyone who opens a free link and signs in gets the full version, Ask Me, verse breakdowns, notes, study plans and the daily videos, at no cost.</p><div id="owner-body"><p class="loading">Loading…</p></div>`);
-  let ov;
+  let ov, an = null;
   try { ov = await E().query('owner:overview', {}); } catch (e) { $('#owner-body').innerHTML = `<p class="err">${esc(String(e.message).split('\n')[0])}</p>`; return; }
+  try { an = await E().query('analytics:overview', { now: Date.now() }); } catch (e) { console.error(e); }
   if (cur.page !== 'owner') return;
-  $('#owner-body').innerHTML = `
+  $('#owner-body').innerHTML = `<div id="analytics">${an ? '' : '<p class="sub">Analytics will appear after the next backend deploy.</p>'}</div>`;
+  if (an) { OWNER_AN = an; renderAnalytics(); }
+  $('#owner-body').insertAdjacentHTML('beforeend', `<h3 class="nh" style="margin-top:28px">Free links</h3>
     <div class="two"><section class="card"><p class="eyebrow">Readers with Elyon Plus</p><p class="ph" style="margin:0">${ov.plusMembers}</p><p class="sub">${ov.paid} paid · ${ov.plusMembers - ov.paid} free</p></section>
       <section class="card"><p class="eyebrow">Free links</p><p class="ph" style="margin:0">${ov.gifts.length}</p><p class="sub">${ov.gifts.reduce((n, g) => n + g.uses, 0)} people used them</p></section></div>
     <section class="card"><p class="eyebrow">Make a free link</p>
@@ -311,7 +314,7 @@ PAGES.owner = async () => {
       <div class="row" style="margin:0"><input class="oinput link" readonly value="${giftUrl(g.code)}"><button class="pill solid" data-copy="${g.code}">Copy</button><button class="pill" data-share="${g.code}">Share</button>
       <button class="pill" data-toggle="${g.code}|${g.active ? 0 : 1}">${g.active ? 'Turn off' : 'Turn on'}</button></div></section>`).join('')}
     <section class="card"><p class="eyebrow">Give Elyon Plus to an account</p><p class="sub">For someone who already has an account on bookofelyon.org.</p>
-      <form id="grant-form" class="row"><input name="email" type="email" required placeholder="their@email.com" class="oinput"><button class="pill solid">Give Elyon Plus</button></form><p id="grant-msg" class="sub"></p></section>`;
+      <form id="grant-form" class="row"><input name="email" type="email" required placeholder="their@email.com" class="oinput"><button class="pill solid">Give Elyon Plus</button></form><p id="grant-msg" class="sub"></p></section>`);
   $('#gift-form').onsubmit = (e) => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target));
     act(() => E().mutation('owner:createGift', { label: f.label || '', maxUses: f.max ? +f.max : null }), null, () => { toast('Free link created'); PAGES.owner(); }); };
   $('#grant-form').onsubmit = (e) => { e.preventDefault(); const email = new FormData(e.target).get('email');
@@ -325,6 +328,98 @@ document.addEventListener('click', (e) => {
     else navigator.clipboard?.writeText(url).then(() => toast('Link copied')); }
   if (tg) { const [code, on] = tg.dataset.toggle.split('|'); act(() => E().mutation('owner:setGiftActive', { code, active: on === '1' }), null, () => PAGES.owner()); }
 });
+
+// ---- Analytics (owner page)
+let OWNER_AN = null, AN_PERIOD = 'd30';
+const fmt = (n) => n.toLocaleString();
+const PAGE_NAMES = { read: 'Reading', today: 'Today', plans: 'Study Plans', plan: 'A study plan', topics: 'Topics', topic: 'A topic', notes: 'My Notes', plus: 'Elyon Plus', cover: 'Cover', contents: 'Contents', references: 'References', credits: 'Credits', gift: 'Free link', privacy: 'Privacy', terms: 'Terms' };
+function renderAnalytics() {
+  const an = OWNER_AN, box = $('#analytics'); if (!an || !box) return;
+  const p = an.periods[AN_PERIOD];
+  const days = AN_PERIOD === 'd7' ? 7 : AN_PERIOD === 'd30' ? 30 : 90;
+  const series = an.daily.slice(-days);
+  const tiles = [
+    ['Page views', fmt(p.views)], ['Visitors', fmt(p.visits), 'one per person per day'], ['New visitors', fmt(p.newVisitors)],
+    ['New accounts', fmt(p.signups)], ['Paid upgrades', fmt(p.paid), '$' + (p.revenueCents / 100).toFixed(2)], ['Free Plus given', fmt(p.freeGiven)],
+    ['Ask Me questions', fmt(p.asks)], ['Verse breakdowns', fmt(p.verses)],
+  ];
+  const list = (items, name) => items.length ? `<ol class="toplist">${items.slice(0, 8).map((x) => `<li><span>${esc(name(x.key))}</span><i style="width:${Math.max(4, (x.count / items[0].count) * 100)}%"></i><b>${fmt(x.count)}</b></li>`).join('')}</ol>` : '<p class="sub">Nothing yet.</p>';
+  box.innerHTML = `
+    <div class="row an-head"><h3 class="nh" style="margin:0">Analytics</h3>
+      <div class="seg" role="tablist">${[['d7', '7 days'], ['d30', '30 days'], ['d90', '90 days'], ['all', 'All time']].map(([k, l]) => `<button role="tab" aria-selected="${k === AN_PERIOD}" data-period="${k}">${l}</button>`).join('')}</div></div>
+    <div class="tiles">${tiles.map(([l, v, sub]) => `<div class="tile"><p class="tl">${l}</p><p class="tv">${v}</p>${sub ? `<p class="ts">${sub}</p>` : ''}</div>`).join('')}</div>
+    <section class="card"><div class="row" style="margin:0 0 8px;justify-content:space-between"><p class="eyebrow" style="margin:0">Page views per day${AN_PERIOD === 'all' ? ' · last 90 days' : ''}</p>
+      <button class="linkbtn" id="an-table-btn">Show as table</button></div>
+      ${barChart(AN_PERIOD === 'all' ? an.daily : series)}
+      <div id="an-table" hidden>${dayTable(AN_PERIOD === 'all' ? an.daily : series)}</div></section>
+    <div class="two"><section class="card"><p class="eyebrow">Most visited</p>${list(p.pages, (k) => PAGE_NAMES[k] || k)}</section>
+      <section class="card"><p class="eyebrow">Most read books</p>${list(p.books, bookName)}</section></div>
+    <p class="sub">All time: ${fmt(an.totals.accounts)} accounts · ${fmt(an.totals.plus)} with Elyon Plus · ${fmt(an.totals.notes)} notes · ${fmt(an.totals.activePlans)} study plans started${an.totals.since ? ` · counting visits since ${new Date(an.totals.since + 'T12:00:00Z').toLocaleDateString()}` : ''}. Your own visits aren't counted.</p>`;
+  box.querySelectorAll('[data-period]').forEach((b) => b.onclick = () => { AN_PERIOD = b.dataset.period; renderAnalytics(); });
+  $('#an-table-btn').onclick = (e) => { const t = $('#an-table'); t.hidden = !t.hidden; e.target.textContent = t.hidden ? 'Show as table' : 'Hide table'; };
+  wireChart();
+}
+function barChart(rows) {
+  const W = 600, H = 170, padL = 34, padB = 22, padT = 8, n = rows.length;
+  const max = Math.max(4, ...rows.map((r) => r.views));
+  const step = Math.pow(10, Math.floor(Math.log10(max))), nice = Math.ceil(max / step) * step;
+  const bw = (W - padL) / n, gap = n > 60 ? 1 : 2, barW = Math.max(1, bw - gap);
+  const y = (v) => padT + (H - padT - padB) * (1 - v / nice);
+  const r = Math.min(4, barW / 2);
+  const bars = rows.map((d, i) => {
+    const x = padL + i * bw + gap / 2, top = y(d.views), base = H - padB, h = base - top;
+    const label = `${new Date(d.date + 'T12:00:00Z').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}: ${fmt(d.views)} views, ${fmt(d.visits)} visitors`;
+    const shape = h <= 0 ? '' : h < r ? `<rect x="${x}" y="${top}" width="${barW}" height="${h}" class="bar"/>`
+      : `<path class="bar" d="M${x} ${base}V${top + r}Q${x} ${top} ${x + r} ${top}H${x + barW - r}Q${x + barW} ${top} ${x + barW} ${top + r}V${base}Z"/>`;
+    return `<g class="hit" data-tip="${esc(label)}"><rect x="${padL + i * bw}" y="${padT}" width="${bw}" height="${H - padT - padB}" fill="transparent"/>${shape}</g>`;
+  }).join('');
+  const grid = [0, 0.5, 1].map((f) => { const v = Math.round(nice * f), yy = y(v); return `<line x1="${padL}" x2="${W}" y1="${yy}" y2="${yy}" class="grid"/><text x="${padL - 6}" y="${yy + 4}" class="axis" text-anchor="end">${fmt(v)}</text>`; }).join('');
+  const lbl = (i, anchor) => `<text x="${padL + i * bw + bw / 2}" y="${H - 6}" class="axis" text-anchor="${anchor}">${new Date(rows[i].date + 'T12:00:00Z').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</text>`;
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Page views per day">${grid}${bars}${lbl(0, 'start')}${n > 2 ? lbl(Math.floor(n / 2), 'middle') : ''}${lbl(n - 1, 'end')}</svg><div class="tip" hidden></div></div>`;
+}
+function dayTable(rows) {
+  return `<table class="reftab"><thead><tr><th>Date</th><th>Page views</th><th>Visitors</th></tr></thead><tbody>${[...rows].reverse().map((d) => `<tr><td>${new Date(d.date + 'T12:00:00Z').toLocaleDateString()}</td><td>${fmt(d.views)}</td><td>${fmt(d.visits)}</td></tr>`).join('')}</tbody></table>`;
+}
+function wireChart() {
+  const c = document.querySelector('#analytics .chart'); if (!c) return;
+  const tip = c.querySelector('.tip');
+  c.querySelectorAll('.hit').forEach((g) => {
+    const show = () => { const b = g.getBoundingClientRect(), cb = c.getBoundingClientRect(); tip.textContent = g.dataset.tip; tip.hidden = false;
+      tip.style.left = Math.min(Math.max(0, b.left - cb.left + b.width / 2 - tip.offsetWidth / 2), cb.width - tip.offsetWidth) + 'px'; g.classList.add('on'); };
+    const hide = () => { tip.hidden = true; g.classList.remove('on'); };
+    g.addEventListener('mouseenter', show); g.addEventListener('mouseleave', hide); g.addEventListener('click', show);
+  });
+}
+
+// ---- Counting visits (anonymous; see the Privacy Policy)
+let lastTracked = '';
+function visitorId() {
+  try {
+    let id = localStorage.getItem('elyon-v');
+    if (!id) { id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => 'abcdefghijklmnopqrstuvwxyz0123456789'[b % 36]).join(''); localStorage.setItem('elyon-v', id); }
+    return id;
+  } catch { return null; }
+}
+function trackView() {
+  if (!E().enabled || isOwner) return;
+  const h = location.hash.slice(1) || 'cover', id = h.split('/')[0];
+  if (h === lastTracked) return; lastTracked = h;
+  const isBook = IDX && IDX.books.some((b) => b.id === id);
+  const visitor = visitorId(); if (!visitor) return;
+  E().mutation('analytics:track', { visitor, page: isBook ? 'read' : id, ...(isBook ? { book: id } : {}) }).catch(() => {});
+}
+function trackEvent(event) {
+  const visitor = visitorId();
+  if (E().enabled && !isOwner && visitor) E().mutation('analytics:track', { visitor, page: 'today', event }).catch(() => {});
+}
+// Count Ask Me questions and verse breakdowns that succeed.
+const _api = api;
+api = async function (path, body, retried) {
+  const d = await _api(path, body, retried);
+  if (!retried) trackEvent(path === '/api/ask' ? 'ask' : body && body.kind === 'deeper' ? 'verse-deeper' : 'verse');
+  return d;
+};
+addEventListener('hashchange', () => setTimeout(trackView, 300));
 
 // The page a free link opens: sign in, then Elyon Plus unlocks.
 PAGES.gift = async ([code]) => {
@@ -360,6 +455,7 @@ PAGES.privacy = () => page('privacy', `<div class="legal"><h2 class="ph">Privacy
   <p>The Book of Elyon (“we”) offers a scripture reader at bookofelyon.org and in our mobile apps. This policy explains what information we collect and how we use it. We do not sell your information, show ads, or use tracking or advertising cookies.</p>
   <h3>Reading without an account</h3>
   <p>You can read every book, the topics and the study plans without an account. We do not ask who you are. Our hosting provider keeps standard server logs (such as IP address and pages requested) for security and reliability.</p>
+  <p>To know how the site is used, we count page views anonymously: your browser keeps a random number (not a cookie, and not linked to your name, email or account) so we can count each visitor once a day. We only see totals, such as how many people visited this week and which books are read most. It is never used for advertising and never shared.</p>
   <h3>Your account</h3>
   <ul><li><b>What we store:</b> your name, email address and a securely hashed password (we never see or store your password itself); the notes you write; and which study plan days you have finished.</li>
   <li><b>Why:</b> to sign you in and keep your notes and progress available on any device.</li>
@@ -553,6 +649,7 @@ function plusTab() {
 }
 function boot() {
   acctButton();
+  setTimeout(trackView, 2500); // after sign-in has settled, so the owner isn't counted
   if (!PAGES[location.hash.slice(1).split('/')[0]]) markTab('read');
   if (!E().enabled) return;
   E().onAuth((signedIn) => { if (!signedIn) { me = null; myNotes = []; myPlans = []; plus = false; plusKnown = false; isOwner = false; plusTab(); acctButton(); rerender(); } startWatching(); });
