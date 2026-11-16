@@ -181,11 +181,25 @@ PAGES.topic = async ([id]) => {
   const t = T.topics.find((x) => x.id === id);
   if (!t) return PAGES.topics();
   page('topics', `<p class="crumb"><a href="#topics">‹ Topics</a></p><p class="he big" lang="he" dir="rtl">${esc(t.he)}</p><h2 class="ph">${esc(t.name)}</h2><p class="pintro">${esc(t.blurb)}</p><div id="topic-body"><p class="loading">Loading passages…</p></div>`);
+  if (t.names) return renderNames(t);
   const parts = await Promise.all(t.refs.map(async (ref) => { const r = parseRef(ref); return r ? { ref, r, vs: await versesOf(r) } : null; }));
   if (cur.page !== 'topics' || !$('#topic-body')) return;
   $('#topic-body').innerHTML = parts.filter(Boolean).map(({ ref, r, vs }) => `<section class="card passage"><p class="vref">${refLink(r, ref)}</p><p class="ptext">${vs.map((v) => `<sup>${v.n}</sup>${esc(v.t)}`).join(' ')}</p></section>`).join('')
     + `<div class="row"><button class="pill solid" data-ask-topic="${esc(t.name)}">Ask about ${esc(t.name.toLowerCase())}</button></div>`;
 };
+/** The Names of God: grouped names, each with its meaning and the verse where it appears. */
+async function renderNames(t) {
+  const groups = await Promise.all(t.names.map(async (g) => ({ group: g.group, items: await Promise.all(g.items.map(async (n) => {
+    const r = parseRef(n.ref); return { ...n, r, vs: r ? await versesOf(r) : [] }; })) })));
+  if (cur.page !== 'topics' || !$('#topic-body')) return;
+  $('#topic-body').innerHTML = `<div class="name-jump" role="navigation" aria-label="Groups">${groups.map((g, i) => `<a href="javascript:void(0)" data-jump="ng${i}">${esc(g.group)}</a>`).join('')}</div>`
+    + groups.map((g, i) => `<h3 class="nh" id="ng${i}">${esc(g.group)}</h3><div class="names">${g.items.map((n) => `
+      <section class="card name"><div class="nhead"><h4>${esc(n.name)}</h4>${n.he ? `<span class="he" lang="he" dir="rtl">${esc(n.he)}</span>` : ''}</div>
+        <p class="nabout">${esc(n.about)}</p>
+        ${n.r ? `<p class="ptext small">${n.vs.map((v) => `<sup>${v.n}</sup>${esc(v.t)}`).join(' ')}</p><p class="vref">${refLink(n.r, n.ref)}</p>` : ''}</section>`).join('')}</div>`).join('')
+    + `<div class="row"><button class="pill solid" data-ask-topic="the names of God">Ask about the names of God</button></div>`;
+  document.querySelectorAll('[data-jump]').forEach((a) => a.onclick = () => document.getElementById(a.dataset.jump).scrollIntoView({ behavior: 'smooth', block: 'start' }));
+}
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-ask-topic]'); if (!b) return;
   openAsk(); const s = b.dataset.askTopic;

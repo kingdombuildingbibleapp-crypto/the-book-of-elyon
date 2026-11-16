@@ -1,27 +1,869 @@
 {
-  "topics": [
-    {"id":"names-of-god","name":"The Names of God","he":"שְׁמוֹת","blurb":"Elyon, El Shaddai, YHWH, Adonai: how scripture names the Most High.","refs":["Genesis 14:18-20","Psalms 91:1-2","Genesis 17:1","Exodus 3:13-15","Exodus 6:2-3","Genesis 22:14","Psalms 83:18","Daniel 4:34"]},
-    {"id":"shalom","name":"Peace","he":"שָׁלוֹם","blurb":"Shalom: wholeness, rest and peace with God and others.","refs":["Numbers 6:24-26","Isaiah 26:3","Psalms 4:8","John 14:27","Philippians 4:6-7","Romans 5:1"]},
-    {"id":"faith","name":"Faith and Trust","he":"אֱמוּנָה","blurb":"Trusting God when the way is not clear.","refs":["Habakkuk 2:4","Proverbs 3:5-6","Hebrews 11:1","Hebrews 11:6","Romans 10:17","Mark 11:22-24","Genesis 15:6"]},
-    {"id":"love","name":"Love","he":"אַהֲבָה","blurb":"God's love, and the call to love God and neighbour.","refs":["Deuteronomy 6:4-5","Leviticus 19:18","1 Corinthians 13:4-7","John 3:16","1 John 4:7-8","Romans 8:38-39","Song of Songs 8:6-7"]},
-    {"id":"hope","name":"Hope","he":"תִּקְוָה","blurb":"Hope that holds in hard seasons.","refs":["Jeremiah 29:11","Lamentations 3:21-23","Isaiah 40:31","Romans 15:13","Psalms 42:11","Hebrews 6:19"]},
-    {"id":"forgiveness","name":"Forgiveness","he":"סְלִיחָה","blurb":"Being forgiven, and forgiving others.","refs":["Psalms 103:10-12","Isaiah 1:18","Micah 7:18-19","Matthew 6:14-15","Ephesians 4:32","1 John 1:9","Sirach 28:2"]},
-    {"id":"prayer","name":"Prayer","he":"תְּפִלָּה","blurb":"How to pray, and why prayer matters.","refs":["Matthew 6:9-13","Psalms 145:18","Jeremiah 33:3","Philippians 4:6","1 Thessalonians 5:16-18","James 5:16","Tobit 12:8"]},
-    {"id":"wisdom","name":"Wisdom","he":"חָכְמָה","blurb":"The fear of the Lord as the beginning of wisdom.","refs":["Proverbs 1:7","Proverbs 9:10","Job 28:28","James 1:5","Wisdom of Solomon 7:7-10","Sirach 1:1-4","Ecclesiastes 12:13"]},
-    {"id":"comfort","name":"Comfort in Grief","he":"נֶחָמָה","blurb":"God's nearness to the brokenhearted.","refs":["Psalms 34:18","Psalms 23:1-6","Isaiah 41:10","Matthew 5:4","2 Corinthians 1:3-4","Revelation 21:4","Isaiah 40:1-2"]},
-    {"id":"fear","name":"Fear and Anxiety","he":"פַּחַד","blurb":"Words for anxious hearts.","refs":["Joshua 1:9","Isaiah 43:1-2","Psalms 27:1","Psalms 56:3-4","Matthew 6:31-34","1 Peter 5:7","2 Timothy 1:7"]},
-    {"id":"covenant","name":"Covenant","he":"בְּרִית","blurb":"The covenants God makes with Noah, Abraham, Moses, David, and the new covenant.","refs":["Genesis 9:11-13","Genesis 15:18","Genesis 17:7","Exodus 19:5-6","2 Samuel 7:12-16","Jeremiah 31:31-34","Luke 22:20"]},
-    {"id":"sabbath","name":"Sabbath and Rest","he":"שַׁבָּת","blurb":"The gift of the seventh day.","refs":["Genesis 2:2-3","Exodus 20:8-11","Deuteronomy 5:12-15","Isaiah 58:13-14","Mark 2:27-28","Hebrews 4:9-10","Jubilees 2:17-18"]},
-    {"id":"messiah","name":"The Messiah","he":"מָשִׁיחַ","blurb":"The promised anointed one, in the prophets and the gospels.","refs":["Isaiah 9:6-7","Isaiah 53:3-6","Micah 5:2","Zechariah 9:9","Daniel 7:13-14","Luke 4:17-21","John 1:41"]},
-    {"id":"holy-spirit","name":"The Spirit of God","he":"רוּחַ","blurb":"Ruach: the breath and Spirit of God.","refs":["Genesis 1:2","Ezekiel 36:26-27","Joel 2:28-29","Zechariah 4:6","John 14:26","Acts 2:1-4","Galatians 5:22-23"]},
-    {"id":"repentance","name":"Returning to God","he":"תְּשׁוּבָה","blurb":"Teshuvah: turning back to God with the whole heart.","refs":["Joel 2:12-13","Hosea 14:1-2","2 Chronicles 7:14","Ezekiel 18:30-32","Luke 15:20-24","Acts 3:19","Prayer of Manasseh 1:11-13"]},
-    {"id":"justice","name":"Justice and Mercy","he":"צֶדֶק","blurb":"Doing justice, loving mercy, walking humbly.","refs":["Micah 6:8","Amos 5:24","Isaiah 1:17","Proverbs 31:8-9","Matthew 25:35-40","James 1:27"]},
-    {"id":"creation","name":"Creation","he":"בְּרֵאשִׁית","blurb":"In the beginning: God as Creator.","refs":["Genesis 1:1-5","Genesis 1:26-28","Psalms 19:1-4","Psalms 104:24","Job 38:4-7","John 1:1-3","Colossians 1:16-17"]},
-    {"id":"angels","name":"Angels","he":"מַלְאָכִים","blurb":"Messengers of the Most High, in the canon, Tobit and Enoch.","refs":["Psalms 91:11-12","Daniel 10:12-13","Tobit 12:15","1 Enoch 20:1-8","Luke 1:26-31","Hebrews 1:14","Isaiah 6:1-3"]},
-    {"id":"worship","name":"Worship and Praise","he":"הַלְלוּיָהּ","blurb":"Hallelujah: praising God with song and life.","refs":["Psalms 150:1-6","Psalms 100:1-5","Psalms 95:1-6","1 Chronicles 16:23-31","John 4:23-24","Romans 12:1","Revelation 4:8-11"]},
-    {"id":"israel","name":"Israel and the Nations","he":"יִשְׂרָאֵל","blurb":"God's promise to Abraham and blessing for every nation.","refs":["Genesis 12:1-3","Deuteronomy 7:6-8","Isaiah 49:6","Isaiah 2:2-4","Romans 11:1-2","Romans 11:25-29","Ephesians 2:13-14"]},
-    {"id":"resurrection","name":"Resurrection and Eternal Life","he":"תְּחִיַּת הַמֵּתִים","blurb":"The hope of life beyond death.","refs":["Daniel 12:2-3","Isaiah 26:19","Job 19:25-27","2 Maccabees 7:9","John 11:25-26","1 Corinthians 15:20-22","1 Thessalonians 4:16-17"]},
-    {"id":"strength","name":"Strength for Hard Times","he":"כֹּחַ","blurb":"When you feel weak or worn out.","refs":["Isaiah 40:29-31","Nehemiah 8:10","Psalms 46:1-3","2 Corinthians 12:9-10","Philippians 4:13","Habakkuk 3:17-19"]}
-  ],
-  "daily": ["Psalms 91:1","Numbers 6:24-26","Psalms 23:1","Isaiah 40:31","Jeremiah 29:11","Proverbs 3:5-6","Joshua 1:9","Psalms 46:10","Lamentations 3:22-23","Micah 6:8","Isaiah 41:10","Psalms 121:1-2","Deuteronomy 31:6","Psalms 37:4","Isaiah 26:3","Psalms 34:8","Zephaniah 3:17","Psalms 27:1","Psalms 118:24","Isaiah 43:2","Psalms 139:14","Psalms 16:11","Habakkuk 3:19","Psalms 19:14","Psalms 103:2-4","Isaiah 9:6","Psalms 145:18","Exodus 15:2","Psalms 62:1-2","Nehemiah 8:10","John 14:27","Matthew 11:28","Romans 8:28","Philippians 4:6-7","Romans 15:13","2 Corinthians 5:17","Galatians 2:20","Hebrews 11:1","James 1:5","1 Peter 5:7","1 John 4:19","Revelation 21:4","Matthew 5:14-16","John 15:5","Romans 12:2","Ephesians 2:8-10","Colossians 3:23","Hebrews 13:8","Wisdom of Solomon 3:1","Sirach 2:6","Tobit 4:7","Psalms 84:11","Psalms 30:5","Isaiah 12:2","Psalms 33:20-22","Proverbs 16:3","Isaiah 30:15","Psalms 4:8","Isaiah 55:8-9","Psalms 107:1"]
+ "topics": [
+  {
+   "id": "names-of-god",
+   "name": "The Names of God",
+   "he": "שְׁמוֹת",
+   "blurb": "74 names and titles of God in scripture, from Elohim and El Elyon to Abba, and what each one reveals about Him.",
+   "refs": [
+    "Genesis 14:18-20",
+    "Psalms 91:1-2",
+    "Genesis 17:1",
+    "Exodus 3:13-15",
+    "Exodus 6:2-3",
+    "Genesis 22:14",
+    "Psalms 83:18",
+    "Daniel 4:34"
+   ],
+   "names": [
+    {
+     "group": "God the Creator and Most High",
+     "items": [
+      {
+       "name": "Elohim",
+       "he": "אֱלֹהִים",
+       "about": "God, the mighty Creator who made the heavens and the earth.",
+       "ref": "Genesis 1:1"
+      },
+      {
+       "name": "El Elyon",
+       "he": "אֵל עֶלְיוֹן",
+       "about": "God Most High, above every power, possessor of heaven and earth. This collection is named for Him.",
+       "ref": "Genesis 14:18-20"
+      },
+      {
+       "name": "El Shaddai",
+       "he": "אֵל שַׁדַּי",
+       "about": "God Almighty, all-powerful and all-sufficient for every need.",
+       "ref": "Genesis 17:1"
+      },
+      {
+       "name": "El Olam",
+       "he": "אֵל עוֹלָם",
+       "about": "The Everlasting God, without beginning or end.",
+       "ref": "Genesis 21:33"
+      },
+      {
+       "name": "El Roi",
+       "he": "אֵל רֳאִי",
+       "about": "The God who sees me, who notices the overlooked and the hurting.",
+       "ref": "Genesis 16:13"
+      },
+      {
+       "name": "El Gibbor",
+       "he": "אֵל גִּבּוֹר",
+       "about": "Mighty God, strong to save.",
+       "ref": "Isaiah 9:6"
+      },
+      {
+       "name": "El Chai",
+       "he": "",
+       "about": "The Living God, active and present, unlike lifeless idols.",
+       "ref": "Joshua 3:10"
+      },
+      {
+       "name": "El Haggadol",
+       "he": "",
+       "about": "The great God, mighty and awesome, who shows no partiality.",
+       "ref": "Deuteronomy 10:17"
+      },
+      {
+       "name": "El Hakavod",
+       "he": "",
+       "about": "The God of glory, whose voice thunders over the waters.",
+       "ref": "Psalms 29:3"
+      },
+      {
+       "name": "El De'ot",
+       "he": "",
+       "about": "The God of knowledge, who knows all things and weighs every action.",
+       "ref": "1 Samuel 2:3"
+      },
+      {
+       "name": "Elohei Marom",
+       "he": "",
+       "about": "God on high, exalted above the heavens.",
+       "ref": "Micah 6:6"
+      },
+      {
+       "name": "Elohei Mikkarov",
+       "he": "",
+       "about": "God who is near, not a God far off.",
+       "ref": "Jeremiah 23:23"
+      },
+      {
+       "name": "Elohei Kol Basar",
+       "he": "",
+       "about": "God of all flesh, for whom nothing is too hard.",
+       "ref": "Jeremiah 32:27"
+      },
+      {
+       "name": "Attiq Yomin",
+       "he": "עַתִּיק יוֹמִין",
+       "about": "The Ancient of Days, eternal Judge seated on His throne.",
+       "ref": "Daniel 7:9"
+      },
+      {
+       "name": "Shophet Kol Ha'aretz",
+       "he": "",
+       "about": "Judge of all the earth, who always does what is right.",
+       "ref": "Genesis 18:25"
+      },
+      {
+       "name": "Melech HaKavod",
+       "he": "",
+       "about": "The King of glory, strong and mighty.",
+       "ref": "Psalms 24:10"
+      }
+     ]
+    },
+    {
+     "group": "The LORD of the Covenant (YHWH)",
+     "items": [
+      {
+       "name": "YHWH",
+       "he": "יהוה",
+       "about": "The LORD, the personal, covenant name of God: He who is, and keeps His promises.",
+       "ref": "Exodus 6:2-3"
+      },
+      {
+       "name": "Ehyeh Asher Ehyeh",
+       "he": "אֶהְיֶה אֲשֶׁר אֶהְיֶה",
+       "about": "I AM THAT I AM: the self-existent One who depends on nothing.",
+       "ref": "Exodus 3:14"
+      },
+      {
+       "name": "Adonai",
+       "he": "אֲדֹנָי",
+       "about": "Lord and Master, the rightful owner and ruler of all.",
+       "ref": "Psalms 8:1"
+      },
+      {
+       "name": "YHWH Jireh",
+       "he": "יְהוָה יִרְאֶה",
+       "about": "The LORD will provide, who sees ahead and supplies what is needed.",
+       "ref": "Genesis 22:14"
+      },
+      {
+       "name": "YHWH Rapha",
+       "he": "יְהוָה רֹפְאֶךָ",
+       "about": "The LORD who heals, body and soul.",
+       "ref": "Exodus 15:26"
+      },
+      {
+       "name": "YHWH Nissi",
+       "he": "יְהוָה נִסִּי",
+       "about": "The LORD my banner, under whom His people stand and win.",
+       "ref": "Exodus 17:15"
+      },
+      {
+       "name": "YHWH Mekoddishkem",
+       "he": "",
+       "about": "The LORD who sanctifies you, who makes His people holy.",
+       "ref": "Exodus 31:13"
+      },
+      {
+       "name": "YHWH Shalom",
+       "he": "יְהוָה שָׁלוֹם",
+       "about": "The LORD is peace, wholeness and rest.",
+       "ref": "Judges 6:24"
+      },
+      {
+       "name": "YHWH Tsebaoth",
+       "he": "יְהוָה צְבָאוֹת",
+       "about": "The LORD of hosts, commander of heaven's armies.",
+       "ref": "1 Samuel 1:3"
+      },
+      {
+       "name": "YHWH Rohi",
+       "he": "יְהוָה רֹעִי",
+       "about": "The LORD my shepherd, who leads, feeds and protects.",
+       "ref": "Psalms 23:1"
+      },
+      {
+       "name": "YHWH Tsidkenu",
+       "he": "יְהוָה צִדְקֵנוּ",
+       "about": "The LORD our righteousness, who makes us right with Him.",
+       "ref": "Jeremiah 23:6"
+      },
+      {
+       "name": "YHWH Shammah",
+       "he": "יְהוָה שָׁמָּה",
+       "about": "The LORD is there, present with His people.",
+       "ref": "Ezekiel 48:35"
+      },
+      {
+       "name": "YHWH Elyon",
+       "he": "",
+       "about": "The LORD Most High, worthy of praise.",
+       "ref": "Psalms 7:17"
+      },
+      {
+       "name": "YHWH Hoseenu",
+       "he": "",
+       "about": "The LORD our Maker, before whom we kneel.",
+       "ref": "Psalms 95:6"
+      },
+      {
+       "name": "YHWH Gibbor Milchamah",
+       "he": "",
+       "about": "The LORD mighty in battle, who fights for His people.",
+       "ref": "Psalms 24:8"
+      },
+      {
+       "name": "YHWH Go'el",
+       "he": "",
+       "about": "The LORD your Redeemer, who buys back and sets free.",
+       "ref": "Isaiah 44:24"
+      }
+     ]
+    },
+    {
+     "group": "His Character",
+     "items": [
+      {
+       "name": "El Emunah",
+       "he": "",
+       "about": "The faithful God, who keeps covenant and mercy for a thousand generations.",
+       "ref": "Deuteronomy 7:9"
+      },
+      {
+       "name": "El Rachum",
+       "he": "",
+       "about": "The merciful God, who will not forsake His people.",
+       "ref": "Deuteronomy 4:31"
+      },
+      {
+       "name": "El Nose",
+       "he": "",
+       "about": "The God who forgives, who carries away sin.",
+       "ref": "Psalms 99:8"
+      },
+      {
+       "name": "El Kanna",
+       "he": "",
+       "about": "The jealous God, whose love will not share His people with idols.",
+       "ref": "Exodus 34:14"
+      },
+      {
+       "name": "Elohim Kedoshim",
+       "he": "",
+       "about": "The holy God, set apart and pure.",
+       "ref": "Joshua 24:19"
+      },
+      {
+       "name": "Elohei Tzidki",
+       "he": "",
+       "about": "God of my righteousness, who hears and vindicates.",
+       "ref": "Psalms 4:1"
+      },
+      {
+       "name": "Elohei Mishpat",
+       "he": "",
+       "about": "The God of justice, who waits to be gracious.",
+       "ref": "Isaiah 30:18"
+      },
+      {
+       "name": "Elohei Chasdi",
+       "he": "",
+       "about": "The God of my mercy, whose kindness goes before me.",
+       "ref": "Psalms 59:10"
+      },
+      {
+       "name": "Kedosh Yisrael",
+       "he": "קְדוֹשׁ יִשְׂרָאֵל",
+       "about": "The Holy One of Israel, who helps and redeems.",
+       "ref": "Isaiah 41:14"
+      },
+      {
+       "name": "Avir Yaakov",
+       "he": "",
+       "about": "The Mighty One of Jacob, Savior and Redeemer.",
+       "ref": "Isaiah 49:26"
+      },
+      {
+       "name": "Avinu",
+       "he": "",
+       "about": "Our Father, who formed us as a potter shapes clay.",
+       "ref": "Isaiah 64:8"
+      },
+      {
+       "name": "Yotser",
+       "he": "",
+       "about": "The Potter, who shapes and reshapes His people.",
+       "ref": "Jeremiah 18:6"
+      }
+     ]
+    },
+    {
+     "group": "Our Strength and Refuge",
+     "items": [
+      {
+       "name": "El Yeshuati",
+       "he": "",
+       "about": "God of my salvation, my strength and my song.",
+       "ref": "Isaiah 12:2"
+      },
+      {
+       "name": "El Sali",
+       "he": "",
+       "about": "God my rock, when I feel forgotten.",
+       "ref": "Psalms 42:9"
+      },
+      {
+       "name": "Elohei Ma'uzzi",
+       "he": "",
+       "about": "God my strength, my stronghold.",
+       "ref": "Psalms 43:2"
+      },
+      {
+       "name": "YHWH Tsuri",
+       "he": "",
+       "about": "The LORD my rock, fortress and deliverer.",
+       "ref": "Psalms 18:2"
+      },
+      {
+       "name": "YHWH Misgabbi",
+       "he": "",
+       "about": "The LORD my high tower, a safe place above danger.",
+       "ref": "Psalms 144:2"
+      },
+      {
+       "name": "YHWH Magen",
+       "he": "",
+       "about": "The LORD my shield, the lifter of my head.",
+       "ref": "Psalms 3:3"
+      },
+      {
+       "name": "YHWH Ezer",
+       "he": "",
+       "about": "The LORD my help, maker of heaven and earth.",
+       "ref": "Psalms 121:1-2"
+      },
+      {
+       "name": "YHWH Uzzi",
+       "he": "",
+       "about": "The LORD my strength, in whom my heart trusts.",
+       "ref": "Psalms 28:7"
+      },
+      {
+       "name": "YHWH Ori",
+       "he": "",
+       "about": "The LORD my light, so whom shall I fear?",
+       "ref": "Psalms 27:1"
+      },
+      {
+       "name": "YHWH Machsi",
+       "he": "",
+       "about": "The LORD my refuge, my dwelling place of safety.",
+       "ref": "Psalms 91:9"
+      },
+      {
+       "name": "Ma'on",
+       "he": "",
+       "about": "Our dwelling place, our home in every generation.",
+       "ref": "Psalms 90:1"
+      },
+      {
+       "name": "Tzur Olamim",
+       "he": "",
+       "about": "The Rock of Ages, everlasting strength.",
+       "ref": "Isaiah 26:4"
+      }
+     ]
+    },
+    {
+     "group": "The Son: Messiah",
+     "items": [
+      {
+       "name": "Immanuel",
+       "he": "עִמָּנוּאֵל",
+       "about": "God with us.",
+       "ref": "Isaiah 7:14"
+      },
+      {
+       "name": "Yeshua",
+       "he": "יֵשׁוּעַ",
+       "about": "Jesus: the LORD saves, who saves His people from their sins.",
+       "ref": "Matthew 1:21"
+      },
+      {
+       "name": "Mashiach",
+       "he": "מָשִׁיחַ",
+       "about": "Messiah, the Christ: the Anointed One.",
+       "ref": "John 1:41"
+      },
+      {
+       "name": "Sar Shalom",
+       "he": "",
+       "about": "Prince of Peace, Wonderful Counsellor, Everlasting Father.",
+       "ref": "Isaiah 9:6"
+      },
+      {
+       "name": "The Word (Logos)",
+       "he": "",
+       "about": "The Word who was with God and was God, through whom all things were made.",
+       "ref": "John 1:1-3"
+      },
+      {
+       "name": "Lamb of God",
+       "he": "",
+       "about": "Who takes away the sin of the world.",
+       "ref": "John 1:29"
+      },
+      {
+       "name": "The Good Shepherd",
+       "he": "",
+       "about": "Who lays down His life for the sheep.",
+       "ref": "John 10:11"
+      },
+      {
+       "name": "Bread of Life",
+       "he": "",
+       "about": "Who satisfies the deepest hunger.",
+       "ref": "John 6:35"
+      },
+      {
+       "name": "Light of the World",
+       "he": "",
+       "about": "Whoever follows Him will not walk in darkness.",
+       "ref": "John 8:12"
+      },
+      {
+       "name": "The Resurrection and the Life",
+       "he": "",
+       "about": "In whom death does not have the last word.",
+       "ref": "John 11:25"
+      },
+      {
+       "name": "The Way, the Truth, and the Life",
+       "he": "",
+       "about": "The way to the Father.",
+       "ref": "John 14:6"
+      },
+      {
+       "name": "Alpha and Omega",
+       "he": "",
+       "about": "The beginning and the end, who is, who was and who is to come.",
+       "ref": "Revelation 1:8"
+      },
+      {
+       "name": "Lion of the Tribe of Judah",
+       "he": "",
+       "about": "The Root of David, who has overcome.",
+       "ref": "Revelation 5:5"
+      },
+      {
+       "name": "King of Kings and Lord of Lords",
+       "he": "",
+       "about": "Ruler over every ruler.",
+       "ref": "Revelation 19:16"
+      }
+     ]
+    },
+    {
+     "group": "The Spirit and the Father's Heart",
+     "items": [
+      {
+       "name": "Abba",
+       "he": "אַבָּא",
+       "about": "Father: the close, trusting name the Spirit teaches God's children to cry.",
+       "ref": "Romans 8:15"
+      },
+      {
+       "name": "Ruach Elohim",
+       "he": "",
+       "about": "The Spirit of God, moving over creation.",
+       "ref": "Genesis 1:2"
+      },
+      {
+       "name": "The Comforter (Paraclete)",
+       "he": "",
+       "about": "The Holy Spirit, who teaches and brings to remembrance.",
+       "ref": "John 14:26"
+      },
+      {
+       "name": "The Spirit of Truth",
+       "he": "",
+       "about": "Who guides into all truth.",
+       "ref": "John 16:13"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "shalom",
+   "name": "Peace",
+   "he": "שָׁלוֹם",
+   "blurb": "Shalom: wholeness, rest and peace with God and others.",
+   "refs": [
+    "Numbers 6:24-26",
+    "Isaiah 26:3",
+    "Psalms 4:8",
+    "John 14:27",
+    "Philippians 4:6-7",
+    "Romans 5:1"
+   ]
+  },
+  {
+   "id": "faith",
+   "name": "Faith and Trust",
+   "he": "אֱמוּנָה",
+   "blurb": "Trusting God when the way is not clear.",
+   "refs": [
+    "Habakkuk 2:4",
+    "Proverbs 3:5-6",
+    "Hebrews 11:1",
+    "Hebrews 11:6",
+    "Romans 10:17",
+    "Mark 11:22-24",
+    "Genesis 15:6"
+   ]
+  },
+  {
+   "id": "love",
+   "name": "Love",
+   "he": "אַהֲבָה",
+   "blurb": "God's love, and the call to love God and neighbour.",
+   "refs": [
+    "Deuteronomy 6:4-5",
+    "Leviticus 19:18",
+    "1 Corinthians 13:4-7",
+    "John 3:16",
+    "1 John 4:7-8",
+    "Romans 8:38-39",
+    "Song of Songs 8:6-7"
+   ]
+  },
+  {
+   "id": "hope",
+   "name": "Hope",
+   "he": "תִּקְוָה",
+   "blurb": "Hope that holds in hard seasons.",
+   "refs": [
+    "Jeremiah 29:11",
+    "Lamentations 3:21-23",
+    "Isaiah 40:31",
+    "Romans 15:13",
+    "Psalms 42:11",
+    "Hebrews 6:19"
+   ]
+  },
+  {
+   "id": "forgiveness",
+   "name": "Forgiveness",
+   "he": "סְלִיחָה",
+   "blurb": "Being forgiven, and forgiving others.",
+   "refs": [
+    "Psalms 103:10-12",
+    "Isaiah 1:18",
+    "Micah 7:18-19",
+    "Matthew 6:14-15",
+    "Ephesians 4:32",
+    "1 John 1:9",
+    "Sirach 28:2"
+   ]
+  },
+  {
+   "id": "prayer",
+   "name": "Prayer",
+   "he": "תְּפִלָּה",
+   "blurb": "How to pray, and why prayer matters.",
+   "refs": [
+    "Matthew 6:9-13",
+    "Psalms 145:18",
+    "Jeremiah 33:3",
+    "Philippians 4:6",
+    "1 Thessalonians 5:16-18",
+    "James 5:16",
+    "Tobit 12:8"
+   ]
+  },
+  {
+   "id": "wisdom",
+   "name": "Wisdom",
+   "he": "חָכְמָה",
+   "blurb": "The fear of the Lord as the beginning of wisdom.",
+   "refs": [
+    "Proverbs 1:7",
+    "Proverbs 9:10",
+    "Job 28:28",
+    "James 1:5",
+    "Wisdom of Solomon 7:7-10",
+    "Sirach 1:1-4",
+    "Ecclesiastes 12:13"
+   ]
+  },
+  {
+   "id": "comfort",
+   "name": "Comfort in Grief",
+   "he": "נֶחָמָה",
+   "blurb": "God's nearness to the brokenhearted.",
+   "refs": [
+    "Psalms 34:18",
+    "Psalms 23:1-6",
+    "Isaiah 41:10",
+    "Matthew 5:4",
+    "2 Corinthians 1:3-4",
+    "Revelation 21:4",
+    "Isaiah 40:1-2"
+   ]
+  },
+  {
+   "id": "fear",
+   "name": "Fear and Anxiety",
+   "he": "פַּחַד",
+   "blurb": "Words for anxious hearts.",
+   "refs": [
+    "Joshua 1:9",
+    "Isaiah 43:1-2",
+    "Psalms 27:1",
+    "Psalms 56:3-4",
+    "Matthew 6:31-34",
+    "1 Peter 5:7",
+    "2 Timothy 1:7"
+   ]
+  },
+  {
+   "id": "covenant",
+   "name": "Covenant",
+   "he": "בְּרִית",
+   "blurb": "The covenants God makes with Noah, Abraham, Moses, David, and the new covenant.",
+   "refs": [
+    "Genesis 9:11-13",
+    "Genesis 15:18",
+    "Genesis 17:7",
+    "Exodus 19:5-6",
+    "2 Samuel 7:12-16",
+    "Jeremiah 31:31-34",
+    "Luke 22:20"
+   ]
+  },
+  {
+   "id": "sabbath",
+   "name": "Sabbath and Rest",
+   "he": "שַׁבָּת",
+   "blurb": "The gift of the seventh day.",
+   "refs": [
+    "Genesis 2:2-3",
+    "Exodus 20:8-11",
+    "Deuteronomy 5:12-15",
+    "Isaiah 58:13-14",
+    "Mark 2:27-28",
+    "Hebrews 4:9-10",
+    "Jubilees 2:17-18"
+   ]
+  },
+  {
+   "id": "messiah",
+   "name": "The Messiah",
+   "he": "מָשִׁיחַ",
+   "blurb": "The promised anointed one, in the prophets and the gospels.",
+   "refs": [
+    "Isaiah 9:6-7",
+    "Isaiah 53:3-6",
+    "Micah 5:2",
+    "Zechariah 9:9",
+    "Daniel 7:13-14",
+    "Luke 4:17-21",
+    "John 1:41"
+   ]
+  },
+  {
+   "id": "holy-spirit",
+   "name": "The Spirit of God",
+   "he": "רוּחַ",
+   "blurb": "Ruach: the breath and Spirit of God.",
+   "refs": [
+    "Genesis 1:2",
+    "Ezekiel 36:26-27",
+    "Joel 2:28-29",
+    "Zechariah 4:6",
+    "John 14:26",
+    "Acts 2:1-4",
+    "Galatians 5:22-23"
+   ]
+  },
+  {
+   "id": "repentance",
+   "name": "Returning to God",
+   "he": "תְּשׁוּבָה",
+   "blurb": "Teshuvah: turning back to God with the whole heart.",
+   "refs": [
+    "Joel 2:12-13",
+    "Hosea 14:1-2",
+    "2 Chronicles 7:14",
+    "Ezekiel 18:30-32",
+    "Luke 15:20-24",
+    "Acts 3:19",
+    "Prayer of Manasseh 1:11-13"
+   ]
+  },
+  {
+   "id": "justice",
+   "name": "Justice and Mercy",
+   "he": "צֶדֶק",
+   "blurb": "Doing justice, loving mercy, walking humbly.",
+   "refs": [
+    "Micah 6:8",
+    "Amos 5:24",
+    "Isaiah 1:17",
+    "Proverbs 31:8-9",
+    "Matthew 25:35-40",
+    "James 1:27"
+   ]
+  },
+  {
+   "id": "creation",
+   "name": "Creation",
+   "he": "בְּרֵאשִׁית",
+   "blurb": "In the beginning: God as Creator.",
+   "refs": [
+    "Genesis 1:1-5",
+    "Genesis 1:26-28",
+    "Psalms 19:1-4",
+    "Psalms 104:24",
+    "Job 38:4-7",
+    "John 1:1-3",
+    "Colossians 1:16-17"
+   ]
+  },
+  {
+   "id": "angels",
+   "name": "Angels",
+   "he": "מַלְאָכִים",
+   "blurb": "Messengers of the Most High, in the canon, Tobit and Enoch.",
+   "refs": [
+    "Psalms 91:11-12",
+    "Daniel 10:12-13",
+    "Tobit 12:15",
+    "1 Enoch 20:1-8",
+    "Luke 1:26-31",
+    "Hebrews 1:14",
+    "Isaiah 6:1-3"
+   ]
+  },
+  {
+   "id": "worship",
+   "name": "Worship and Praise",
+   "he": "הַלְלוּיָהּ",
+   "blurb": "Hallelujah: praising God with song and life.",
+   "refs": [
+    "Psalms 150:1-6",
+    "Psalms 100:1-5",
+    "Psalms 95:1-6",
+    "1 Chronicles 16:23-31",
+    "John 4:23-24",
+    "Romans 12:1",
+    "Revelation 4:8-11"
+   ]
+  },
+  {
+   "id": "israel",
+   "name": "Israel and the Nations",
+   "he": "יִשְׂרָאֵל",
+   "blurb": "God's promise to Abraham and blessing for every nation.",
+   "refs": [
+    "Genesis 12:1-3",
+    "Deuteronomy 7:6-8",
+    "Isaiah 49:6",
+    "Isaiah 2:2-4",
+    "Romans 11:1-2",
+    "Romans 11:25-29",
+    "Ephesians 2:13-14"
+   ]
+  },
+  {
+   "id": "resurrection",
+   "name": "Resurrection and Eternal Life",
+   "he": "תְּחִיַּת הַמֵּתִים",
+   "blurb": "The hope of life beyond death.",
+   "refs": [
+    "Daniel 12:2-3",
+    "Isaiah 26:19",
+    "Job 19:25-27",
+    "2 Maccabees 7:9",
+    "John 11:25-26",
+    "1 Corinthians 15:20-22",
+    "1 Thessalonians 4:16-17"
+   ]
+  },
+  {
+   "id": "strength",
+   "name": "Strength for Hard Times",
+   "he": "כֹּחַ",
+   "blurb": "When you feel weak or worn out.",
+   "refs": [
+    "Isaiah 40:29-31",
+    "Nehemiah 8:10",
+    "Psalms 46:1-3",
+    "2 Corinthians 12:9-10",
+    "Philippians 4:13",
+    "Habakkuk 3:17-19"
+   ]
+  }
+ ],
+ "daily": [
+  "Psalms 91:1",
+  "Numbers 6:24-26",
+  "Psalms 23:1",
+  "Isaiah 40:31",
+  "Jeremiah 29:11",
+  "Proverbs 3:5-6",
+  "Joshua 1:9",
+  "Psalms 46:10",
+  "Lamentations 3:22-23",
+  "Micah 6:8",
+  "Isaiah 41:10",
+  "Psalms 121:1-2",
+  "Deuteronomy 31:6",
+  "Psalms 37:4",
+  "Isaiah 26:3",
+  "Psalms 34:8",
+  "Zephaniah 3:17",
+  "Psalms 27:1",
+  "Psalms 118:24",
+  "Isaiah 43:2",
+  "Psalms 139:14",
+  "Psalms 16:11",
+  "Habakkuk 3:19",
+  "Psalms 19:14",
+  "Psalms 103:2-4",
+  "Isaiah 9:6",
+  "Psalms 145:18",
+  "Exodus 15:2",
+  "Psalms 62:1-2",
+  "Nehemiah 8:10",
+  "John 14:27",
+  "Matthew 11:28",
+  "Romans 8:28",
+  "Philippians 4:6-7",
+  "Romans 15:13",
+  "2 Corinthians 5:17",
+  "Galatians 2:20",
+  "Hebrews 11:1",
+  "James 1:5",
+  "1 Peter 5:7",
+  "1 John 4:19",
+  "Revelation 21:4",
+  "Matthew 5:14-16",
+  "John 15:5",
+  "Romans 12:2",
+  "Ephesians 2:8-10",
+  "Colossians 3:23",
+  "Hebrews 13:8",
+  "Wisdom of Solomon 3:1",
+  "Sirach 2:6",
+  "Tobit 4:7",
+  "Psalms 84:11",
+  "Psalms 30:5",
+  "Isaiah 12:2",
+  "Psalms 33:20-22",
+  "Proverbs 16:3",
+  "Isaiah 30:15",
+  "Psalms 4:8",
+  "Isaiah 55:8-9",
+  "Psalms 107:1"
+ ]
 }
