@@ -58,7 +58,9 @@ function page(name, html) {
   scrollTo(0, 0);
 }
 function markTab(name) {
+  if (name === 'owner') name = 'plus';
   document.querySelectorAll('#tabs a').forEach((a) => a.classList.toggle('on', a.dataset.tab === name || (name === 'read' && a.dataset.tab === 'read')));
+  $('#home-btn')?.classList.toggle('on', name === 'today');
 }
 function needAccount(what) {
   if (!E().enabled) return `<div class="card soft"><p>${esc(what)} will be available once accounts are switched on.</p></div>`;
@@ -276,11 +278,11 @@ PAGES.plus = async ([sub, sessionId]) => {
   ];
   let action;
   if (!E().enabled) action = '<p class="pintro">Elyon Plus will be available soon.</p>';
-  else if (plus) action = '<p class="pill solid" style="display:inline-block">✓ You have Elyon Plus</p>';
+  else if (plus) action = `<p class="pill solid" style="display:inline-block">${isOwner ? '✓ Owner: full access to everything' : '✓ You have Elyon Plus'}</p>`;
   else if (isApp()) action = `<p class="pintro">Already have Elyon Plus? Sign in with that account to unlock it here.</p>${me ? '' : '<button class="pill solid" data-signin>Sign in</button>'}`;
   else action = `<button class="pill solid" id="buy-plus" style="font-size:16px;padding:12px 28px">${me ? 'Unlock Elyon Plus for $1.99' : 'Create an account to unlock'}</button><p class="plus-free">One payment, yours for life. No subscription. Secure checkout by Stripe.</p>`;
   page('plus', `<div class="plus-hero"><p class="eyebrow">✦ Elyon Plus</p><h2 class="ph">Go deeper into the Book of Elyon</h2>
-      ${isApp() ? '' : '<p class="price">$1.99</p><p class="once">once, for life</p>'}${action}</div>
+      ${isApp() || plus ? '' : '<p class="price">$1.99</p><p class="once">once, for life</p>'}${action}</div>
     <ul class="plus-list">${items.map(([t, d]) => `<li><b>${esc(t)}</b>${esc(d)}</li>`).join('')}</ul>
     <p class="plus-free">Always free: all 82 books in every translation, the book introductions, Topics and the Verse for Today.</p>`);
   $('#buy-plus')?.addEventListener('click', async (e) => {
@@ -500,6 +502,7 @@ async function act(fn, onFail, onOk) {
   }
 }
 function toast(msg, bad) {
+  document.querySelectorAll('.toast').forEach((old) => old.remove());
   const t = document.createElement('div'); t.className = 'toast' + (bad ? ' bad' : ''); t.textContent = msg;
   document.body.appendChild(t); setTimeout(() => t.classList.add('show'), 10);
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2600);
@@ -511,14 +514,15 @@ function rerender() {
 }
 function startWatching() {
   unwatch.forEach((u) => u()); unwatch = [];
+  plusKnown = false; // a new sign-in: its first hasPlus answer isn't a fresh unlock
   if (!E().enabled) return;
   unwatch.push(E().watch('users:me', {}, (u) => { me = u; acctButton(); rerender(); }));
   unwatch.push(E().watch('notes:mine', {}, (n) => { myNotes = n; markNotes(); if (cur.page === 'notes') PAGES.notes(); }));
   unwatch.push(E().watch('plans:mine', {}, (p) => { myPlans = p; if (cur.page === 'plans' || cur.page === 'today') rerender(); }));
-  unwatch.push(E().watch('owner:isOwner', {}, (o) => { isOwner = o; if (cur.page === 'owner') rerender(); }, () => { isOwner = false; }));
+  unwatch.push(E().watch('owner:isOwner', {}, (o) => { isOwner = o; plusTab(); if (cur.page === 'owner' || cur.page === 'plus') rerender(); }, () => { isOwner = false; }));
   unwatch.push(E().watch('billing:hasPlus', {}, (h) => {
     if (h && !plus && plusKnown && cur.page !== 'plus') toast('✦ Elyon Plus is unlocked');
-    plus = h; plusKnown = true; rerender();
+    plus = h; plusKnown = true; plusTab(); rerender();
     if ($('#ask').classList.contains('open')) openAsk();
   }));
 }
@@ -541,10 +545,16 @@ addEventListener('hashchange', () => {
   else if (['cover', 'contents', 'references', 'credits', ''].includes(id)) markTab('read');
 });
 
+// The Elyon Plus tab: a sales page for free readers; for the owner it becomes the Owner page.
+function plusTab() {
+  const t = document.querySelector('#tabs a[data-tab="plus"]'); if (!t) return;
+  if (isOwner) { t.href = '#owner'; t.dataset.tab = 'plus'; t.textContent = '⚙ Owner'; }
+  else { t.href = '#plus'; t.textContent = plus ? '✦ Plus ✓' : '✦ Elyon Plus'; }
+}
 function boot() {
   acctButton();
   if (!PAGES[location.hash.slice(1).split('/')[0]]) markTab('read');
   if (!E().enabled) return;
-  E().onAuth((signedIn) => { if (!signedIn) { me = null; myNotes = []; myPlans = []; plus = false; plusKnown = false; isOwner = false; acctButton(); rerender(); } startWatching(); });
+  E().onAuth((signedIn) => { if (!signedIn) { me = null; myNotes = []; myPlans = []; plus = false; plusKnown = false; isOwner = false; plusTab(); acctButton(); rerender(); } startWatching(); });
 }
 if (window.Elyon) boot(); else addEventListener('elyon-ready', boot, { once: true });

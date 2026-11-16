@@ -191,3 +191,13 @@ test("owner: free links give Plus, respect limits and on/off; grant by email; ot
   expect(ov.gifts.map((g) => [g.label, g.uses])).toEqual([["Everyone", 1], ["Friends", 1]]);
   delete process.env.OWNER_EMAILS;
 });
+
+test("the built-in owner has everything without paying", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await reader(t, "ArronPinkneySr@gmail.com", false);
+  expect(await owner.as.query(api.owner.isOwner, {})).toBe(true);
+  expect(await owner.as.query(api.billing.hasPlus, {})).toBe(true);
+  await owner.as.mutation(api.notes.save, { bookId: "GEN", chapter: 1, verse: 1, text: "owner note" });
+  await owner.as.mutation(api.plans.setDay, { planId: "gospels-30", day: 1, done: true });
+  expect((await owner.as.query(api.videos.forDay, { date: "2026-03-10" })).locked).toBe(false);
+});

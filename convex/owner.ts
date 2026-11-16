@@ -3,20 +3,14 @@ import { mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { hasPlusFor } from "./billing";
+import { isOwnerUser } from "./lib/owner";
 
 // The owner's page: free Elyon Plus links to share, and Plus given directly
-// to someone's account. Owners are the accounts whose emails are listed in
-// OWNER_EMAILS on the Convex deployment (comma-separated).
-
-function ownerEmails(): string[] {
-  return (process.env.OWNER_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-}
+// to someone's account. Who the owners are: lib/owner.ts.
 
 async function ownerCheck(ctx: QueryCtx | MutationCtx): Promise<boolean> {
   const userId = await getAuthUserId(ctx);
-  if (!userId) return false;
-  const user = await ctx.db.get("users", userId);
-  return !!user?.email && ownerEmails().includes(user.email.toLowerCase());
+  return userId ? await isOwnerUser(ctx, userId) : false;
 }
 
 async function requireOwner(ctx: QueryCtx | MutationCtx) {

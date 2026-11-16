@@ -3,6 +3,7 @@ import { internalMutation, internalQuery, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { isOwnerUser } from "./lib/owner";
 
 // Elyon Plus: a one-time $1.99 upgrade that unlocks Ask Me, verse
 // breakdowns, notes, study plans and the daily videos. Reading the books,
@@ -15,6 +16,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 export const PRICE_CENTS = 199;
 
 export async function hasPlusFor(ctx: QueryCtx | MutationCtx, userId: Id<"users">): Promise<boolean> {
+  if (await isOwnerUser(ctx, userId)) return true; // the owner gets everything
   const row = await ctx.db
     .query("purchases")
     .withIndex("by_userId", (q) => q.eq("userId", userId))

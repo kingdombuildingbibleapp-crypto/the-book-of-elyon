@@ -15,6 +15,7 @@ import type * as stripe from "../stripe.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_owner from "../lib/owner.js";
 import type * as notes from "../notes.js";
 import type * as owner from "../owner.js";
 import type * as planCatalog from "../planCatalog.js";
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   http: typeof http;
   "lib/auth": typeof lib_auth;
+  "lib/owner": typeof lib_owner;
   notes: typeof notes;
   owner: typeof owner;
   planCatalog: typeof planCatalog;
