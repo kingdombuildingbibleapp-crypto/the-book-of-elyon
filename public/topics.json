@@ -4,7 +4,7 @@
    "id": "names-of-god",
    "name": "The Names of God",
    "he": "שְׁמוֹת",
-   "blurb": "74 names and titles of God in scripture, from Elohim and El Elyon to Abba, and what each one reveals about Him.",
+   "blurb": "108 names and titles of God in scripture, from Elohim and El Elyon to Abba, and what each one reveals about Him.",
    "refs": [
     "Genesis 14:18-20",
     "Psalms 91:1-2",
@@ -114,6 +114,72 @@
        "he": "",
        "about": "The King of glory, strong and mighty.",
        "ref": "Psalms 24:10"
+      },
+      {
+       "name": "El",
+       "he": "אֵל",
+       "about": "God, the Mighty One: the oldest and shortest Hebrew word for God.",
+       "ref": "Genesis 35:1"
+      },
+      {
+       "name": "Eloah",
+       "he": "אֱלוֹהַּ",
+       "about": "God (singular form of Elohim), used often in the book of Job.",
+       "ref": "Job 3:4"
+      },
+      {
+       "name": "Elah",
+       "he": "אֱלָהּ",
+       "about": "God, in Aramaic, the language of parts of Daniel and Ezra.",
+       "ref": "Daniel 2:18"
+      },
+      {
+       "name": "El Elim",
+       "he": "אֵל אֵלִים",
+       "about": "God of gods, above every so-called god.",
+       "ref": "Daniel 11:36"
+      },
+      {
+       "name": "Elah Elahin",
+       "he": "אֱלָהּ אֱלָהִין",
+       "about": "God of gods and Lord of kings, who reveals secrets.",
+       "ref": "Daniel 2:47"
+      },
+      {
+       "name": "El HaShamayim",
+       "he": "אֵל הַשָּׁמָיִם",
+       "about": "The God of heaven, whose mercy endures for ever.",
+       "ref": "Psalms 136:26"
+      },
+      {
+       "name": "Elohim Bashamayim",
+       "he": "אֱלֹהִים בַּשָּׁמַיִם",
+       "about": "God in heaven, ruler over all the kingdoms of the nations.",
+       "ref": "2 Chronicles 20:6"
+      },
+      {
+       "name": "Elah Shemaya",
+       "he": "אֱלָהּ שְׁמַיָּא",
+       "about": "The God of heaven, named by Persian kings in the book of Ezra.",
+       "ref": "Ezra 7:23"
+      },
+      {
+       "name": "Elohei Kedem",
+       "he": "אֱלֹהֵי קֶדֶם",
+       "about": "The eternal God, whose everlasting arms are underneath.",
+       "ref": "Deuteronomy 33:27"
+      },
+      {
+       "name": "El Echad",
+       "he": "אֵל אֶחָד",
+       "about": "One God, who created us all.",
+       "ref": "Malachi 2:10"
+      },
+      {
+       "name": "Adonei HaAdonim",
+       "he": "אֲדֹנֵי הָאֲדֹנִים",
+       "about": "Lord of lords.",
+       "ref": "Deuteronomy 10:17"
       }
      ]
     },
@@ -215,6 +281,60 @@
        "he": "",
        "about": "The LORD your Redeemer, who buys back and sets free.",
        "ref": "Isaiah 44:24"
+      },
+      {
+       "name": "Yah",
+       "he": "יָהּ",
+       "about": "The short, poetic form of God's name, heard in Hallelu-jah.",
+       "ref": "Psalms 68:4"
+      },
+      {
+       "name": "YHWH Elohim",
+       "he": "יְהוָה אֱלֹהִים",
+       "about": "The LORD God: the covenant Lord who is also the Creator.",
+       "ref": "Genesis 2:4"
+      },
+      {
+       "name": "Adonai YHWH",
+       "he": "אֲדֹנָי יְהוִה",
+       "about": "Lord GOD: the Master who is the covenant LORD.",
+       "ref": "Genesis 15:2"
+      },
+      {
+       "name": "YHWH Elohai",
+       "he": "יְהוָה אֱלֹהַי",
+       "about": "The LORD my God, a personal confession of faith.",
+       "ref": "Deuteronomy 4:5"
+      },
+      {
+       "name": "YHWH Eloheichem",
+       "he": "יְהוָה אֱלֹהֵיכֶם",
+       "about": "The LORD your God, who brought His people out of Egypt.",
+       "ref": "Numbers 15:41"
+      },
+      {
+       "name": "YHWH Tsuri V'Go'ali",
+       "he": "יְהוָה צוּרִי וְגֹאֲלִי",
+       "about": "The LORD my strength and my redeemer.",
+       "ref": "Psalms 19:14"
+      },
+      {
+       "name": "YHWH Elohei Yisrael",
+       "he": "יְהוָה אֱלֹהֵי יִשְׂרָאֵל",
+       "about": "The LORD God of Israel.",
+       "ref": "Exodus 5:1"
+      },
+      {
+       "name": "Elohei Avraham, Yitzchak v'Yaakov",
+       "he": "",
+       "about": "The God of Abraham, Isaac and Jacob: faithful to every generation.",
+       "ref": "Exodus 3:15"
+      },
+      {
+       "name": "Elohei Tz'vaot",
+       "he": "אֱלֹהֵי צְבָאוֹת",
+       "about": "The LORD God of hosts, who was with David.",
+       "ref": "2 Samuel 5:10"
       }
      ]
     },
@@ -292,6 +412,54 @@
        "he": "",
        "about": "The Potter, who shapes and reshapes His people.",
        "ref": "Jeremiah 18:6"
+      },
+      {
+       "name": "El HaKadosh",
+       "he": "אֵל הַקָּדוֹשׁ",
+       "about": "God the Holy One, shown holy in righteousness.",
+       "ref": "Isaiah 5:16"
+      },
+      {
+       "name": "El Tzaddik",
+       "he": "אֵל צַדִּיק",
+       "about": "A just God and a Saviour; there is none beside Him.",
+       "ref": "Isaiah 45:21"
+      },
+      {
+       "name": "El Channun",
+       "he": "אֵל חַנּוּן",
+       "about": "The gracious God, slow to anger and of great kindness.",
+       "ref": "Jonah 4:2"
+      },
+      {
+       "name": "El HaNora",
+       "he": "אֵל הַנּוֹרָא",
+       "about": "The great, mighty and terrible (awe-inspiring) God, who keeps covenant and mercy.",
+       "ref": "Nehemiah 9:32"
+      },
+      {
+       "name": "El Emet",
+       "he": "אֵל אֱמֶת",
+       "about": "The LORD God of truth.",
+       "ref": "Psalms 31:5"
+      },
+      {
+       "name": "Elohim Emet",
+       "he": "אֱלֹהִים אֱמֶת",
+       "about": "The true God, the living God and everlasting King.",
+       "ref": "Jeremiah 10:10"
+      },
+      {
+       "name": "El Gemulot",
+       "he": "אֵל גְּמֻלוֹת",
+       "about": "The God of recompences, who repays injustice.",
+       "ref": "Jeremiah 51:56"
+      },
+      {
+       "name": "Elohei Tehillati",
+       "he": "אֱלֹהֵי תְהִלָּתִי",
+       "about": "God of my praise.",
+       "ref": "Psalms 109:1"
       }
      ]
     },
@@ -369,6 +537,42 @@
        "he": "",
        "about": "The Rock of Ages, everlasting strength.",
        "ref": "Isaiah 26:4"
+      },
+      {
+       "name": "Eli",
+       "he": "אֵלִי",
+       "about": "My God: the cry of the psalmist, and of Jesus on the cross.",
+       "ref": "Psalms 22:1"
+      },
+      {
+       "name": "Eloheinu",
+       "he": "אֱלֹהֵינוּ",
+       "about": "Our God.",
+       "ref": "Judges 10:10"
+      },
+      {
+       "name": "El Chayyai",
+       "he": "אֵל חַיָּי",
+       "about": "The God of my life, whose song is with me in the night.",
+       "ref": "Psalms 42:8"
+      },
+      {
+       "name": "El Yeshuatenu",
+       "he": "אֵל יְשׁוּעָתֵנוּ",
+       "about": "The God of our salvation, who daily loads us with benefits.",
+       "ref": "Psalms 68:19"
+      },
+      {
+       "name": "Elohei Tzur Yishi",
+       "he": "אֱלֹהֵי צוּר יִשְׁעִי",
+       "about": "God, the rock of my salvation.",
+       "ref": "2 Samuel 22:47"
+      },
+      {
+       "name": "El Yeshurun",
+       "he": "אֵל יְשֻׁרוּן",
+       "about": "The God of Jeshurun (Israel), who rides the heavens to help.",
+       "ref": "Deuteronomy 33:26"
       }
      ]
     },
