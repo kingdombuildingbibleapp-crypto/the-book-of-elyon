@@ -15,6 +15,7 @@ once. Only native changes (name, icon, splash screen) need a new build.
 | Support URL | https://bookofelyon.org |
 | Category | Books & Reference (Google Play) / Reference or Books (Apple) |
 | Price | Free, no ads, no in-app purchases |
+| Copyright / publisher | © 2026 CoraMar Holdings, Inc. (use this in both stores' copyright and developer-name fields) |
 
 ## Accounts you need
 

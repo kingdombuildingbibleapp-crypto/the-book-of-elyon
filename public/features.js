@@ -466,7 +466,7 @@ PAGES.gift = async ([code]) => {
 const CONTACT = 'support@bookofelyon.org';
 const UPDATED = 'November 15, 2026';
 PAGES.privacy = () => page('privacy', `<div class="legal"><h2 class="ph">Privacy Policy</h2><p class="upd">Last updated ${UPDATED}</p>
-  <p>The Book of Elyon is published by CoraMar Holdings (“we”), and offers a scripture reader at bookofelyon.org and in our mobile apps. This policy explains what information we collect and how we use it. We do not sell your information, show ads, or use tracking or advertising cookies.</p>
+  <p>The Book of Elyon is published by CoraMar Holdings, Inc. (“we”), and offers a scripture reader at bookofelyon.org and in our mobile apps. This policy explains what information we collect and how we use it. We do not sell your information, show ads, or use tracking or advertising cookies.</p>
   <h3>Reading without an account</h3>
   <p>You can read every book, the topics and the study plans without an account. We do not ask who you are. Our hosting provider keeps standard server logs (such as IP address and pages requested) for security and reliability.</p>
   <p>To know how the site is used, we count page views anonymously: your browser keeps a random number (not a cookie, and not linked to your name, email or account) so we can count each visitor once a day. We only see totals, such as how many people visited this week and which books are read most. It is never used for advertising and never shared.</p>
@@ -489,9 +489,9 @@ PAGES.privacy = () => page('privacy', `<div class="legal"><h2 class="ph">Privacy
   <h3>Changes and contact</h3>
   <p>We will post any changes to this policy on this page. Questions: <a href="mailto:${CONTACT}">${CONTACT}</a>.</p></div>`);
 PAGES.terms = () => page('terms', `<div class="legal"><h2 class="ph">Terms of Use</h2><p class="upd">Last updated ${UPDATED}</p>
-  <p>The Book of Elyon is published by CoraMar Holdings. By using its website or apps you agree to these terms.</p>
+  <p>The Book of Elyon is published by CoraMar Holdings, Inc. By using its website or apps you agree to these terms.</p>
   <h3>The texts</h3>
-  <p>The scripture translations in this edition are in the public domain; see Credits for sources. The arrangement, book introductions, design, logo and software are © CoraMar Holdings and may not be copied or republished without permission.</p>
+  <p>The scripture translations in this edition are in the public domain; see Credits for sources. The arrangement, book introductions, design, logo and software are © CoraMar Holdings, Inc. and may not be copied or republished without permission.</p>
   <h3>Elyon Plus</h3>
   <p>Elyon Plus is a one-time purchase ($1.99 US) that unlocks Ask Me, verse breakdowns, notes, study plans and the daily videos for your account, for as long as the service runs. There is no subscription. If something went wrong with your purchase, email us within 30 days for a refund. Deleting your account also removes the upgrade.</p>
   <h3>AI explanations</h3>
