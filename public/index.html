@@ -25,7 +25,7 @@ header{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;
 header h1{font:600 20px/1.2 "EB Garamond",serif;margin:0;flex:1}
 #menu{display:none;border:1px solid var(--line);background:none;color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit}
 .wrap{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - var(--hh,57px))}
-nav{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;max-height:calc(100vh - var(--hh,57px));position:sticky;top:var(--hh,57px)}
+#nav{border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;max-height:calc(100vh - var(--hh,57px));position:sticky;top:var(--hh,57px)}
 nav input{width:calc(100% - 24px);margin:12px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
 .bk{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;padding:8px 14px;cursor:pointer;font:inherit;border-left:3px solid transparent}
 .bk:hover{background:var(--accent-soft)}
@@ -42,6 +42,12 @@ select,.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink
 .text h3{font:600 14px/1 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
 .v sup{color:var(--accent);font:600 11px Inter,sans-serif;margin-right:4px}
 .pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:32px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.chnav{display:flex;justify-content:space-between;gap:12px;margin-top:36px}
+.chbtn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;max-width:48%;padding:12px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);text-decoration:none;cursor:pointer;font:inherit;text-align:left}
+.chbtn.nx{align-items:flex-end;text-align:right;margin-left:auto}
+.chbtn:hover{border-color:var(--accent)}
+.chbtn .cd{font:600 13px Inter,sans-serif;color:var(--accent)}
+.chbtn .ct{font:17px "EB Garamond",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .pager input{width:72px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit}
 .bk .p{float:right;font-size:12px;color:var(--muted)}
 .toc h2{text-align:center;margin-bottom:6px}
@@ -66,7 +72,7 @@ select,.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink
 .alts .vn{color:var(--accent);font:600 12px Inter,sans-serif;margin-right:6px}
 header h1 a{color:inherit;text-decoration:none}
 body.on-cover .wrap{grid-template-columns:1fr}
-body.on-cover nav,body.on-cover #menu{display:none}
+body.on-cover #nav,body.on-cover #menu{display:none}
 .cover{min-height:calc(100vh - 160px);display:flex;align-items:center;justify-content:center}
 .frame{max-width:560px;text-align:center;padding:48px 36px;border:1px solid var(--accent);outline:1px solid var(--accent);outline-offset:6px;background:var(--panel)}
 .kicker{font:italic 22px "EB Garamond",serif;color:var(--muted);margin:0}
@@ -150,8 +156,8 @@ body.on-cover nav,body.on-cover #menu{display:none}
 @media (max-width:760px){
   #menu{display:block}
   .wrap{grid-template-columns:1fr}
-  nav{display:none;position:fixed;inset:var(--hh,57px) 0 0 0;max-height:none;z-index:4}
-  nav.open{display:block}
+  #nav{display:none;position:fixed;inset:var(--hh,57px) 0 0 0;max-height:none;z-index:4}
+  #nav.open{display:block}
   main{padding:20px 16px 60px}
   h2{font-size:28px}
 }
@@ -365,6 +371,11 @@ async function open(id,tr,ch,verse){
   const first=Object.values(b.translations)[0];
   const page=b.page+Math.min(cur.ch,first)-1;
   const alts=(cache[id][cur.tr].alternateReadings||{})[cur.ch]||{};
+  // The chapter before and after, running on into the neighbouring books.
+  const bi=IDX.books.indexOf(b), pb=IDX.books[bi-1], nb=IDX.books[bi+1];
+  const chs=(x,tr)=>x.translations[tr]||Object.values(x.translations)[0];
+  const prevT=cur.ch>1?{id,ch:cur.ch-1,name:b.name}:pb?{id:pb.id,ch:chs(pb,cur.tr),name:pb.name}:null;
+  const nextT=cur.ch<n?{id,ch:cur.ch+1,name:b.name}:nb?{id:nb.id,ch:1,name:nb.name}:null;
   const altList=Object.entries(alts).sort((a,b)=>a[0]-b[0]).flatMap(([v,rs])=>rs.map(r=>[v,r]));
   $('#main').innerHTML=`
     <h2>${esc(b.name)}</h2>
@@ -378,6 +389,10 @@ async function open(id,tr,ch,verse){
     ${cur.ch===1&&b.intro?`<div class="intro"><b>About this book</b>${esc(b.intro)}</div>`:''}
     <div class="text"><h3>Chapter ${cur.ch}</h3><p class="hint">Double-tap any verse for an explanation and related passages.</p>${verses.map((v,i)=>`<span class="v" id="v${i+1}" data-v="${i+1}"><sup>${i+1}</sup>${esc(v)}${alts[i+1]?`<a class="alt" href="javascript:void(0)" data-v="${i+1}" title="Alternate reading">†</a>`:''} </span>`).join('')}</div>
     ${altList.length?`<div class="alts"><h4>Alternate readings</h4>${altList.map(([v,r])=>`<p id="alt-${v}"><span class="vn">${cur.ch}:${v}</span>${esc(r)}</p>`).join('')}</div>`:''}
+    <div class="chnav" role="navigation" aria-label="Chapters">
+      ${prevT?`<button class="chbtn" id="prev2"><span class="cd">‹ Previous</span><span class="ct">${esc(prevT.name)} ${prevT.ch}</span></button>`:`<a class="chbtn" href="#contents"><span class="cd">‹ Back</span><span class="ct">Contents</span></a>`}
+      ${nextT?`<button class="chbtn nx" id="next2"><span class="cd">Next ›</span><span class="ct">${esc(nextT.name)} ${nextT.ch}</span></button>`:'<span></span>'}
+    </div>
     <div class="pager"><span>Page ${page} of ${IDX.pages}</span>
       <form id="go"><label>Go to page <input id="pg" type="number" min="1" max="${IDX.pages}" value="${page}"></label></form></div>
     <p class="note">${esc(t.name||cur.tr)} · ${esc(t.license||'')}${t.note?'<br>'+esc(t.note):''}</p>`;
@@ -385,6 +400,8 @@ async function open(id,tr,ch,verse){
   $('#ch').onchange=e=>open(id,cur.tr,+e.target.value);
   $('#prev').onclick=()=>open(id,cur.tr,cur.ch-1);
   $('#next').onclick=()=>open(id,cur.tr,cur.ch+1);
+  if(prevT) $('#prev2').onclick=()=>open(prevT.id,cur.tr,prevT.ch);
+  if(nextT) $('#next2').onclick=()=>open(nextT.id,cur.tr,nextT.ch);
   document.querySelectorAll('.alt').forEach(a=>a.onclick=()=>{const t=document.getElementById('alt-'+a.dataset.v);t.scrollIntoView({behavior:'smooth',block:'center'});t.style.background='var(--accent-soft)';setTimeout(()=>t.style.background='',1500);});
   $('#go').onsubmit=e=>{e.preventDefault(); goPage(+$('#pg').value);};
   renderList($('#q').value); $('#nav').classList.remove('open'); scrollTo(0,0);
