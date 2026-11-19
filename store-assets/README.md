@@ -36,6 +36,15 @@ The app icon (1024×1024) is already in the Xcode project (`ios/App/App/Assets.x
 
 The listing text (descriptions, keywords) is in `docs/APP-STORES.md`.
 
+## Promo videos for YouTube, social media and the website
+
+`videos/book-of-elyon-promo-landscape.mp4` (1920×1080) and
+`videos/book-of-elyon-promo-portrait.mp4` (886×1920, for Reels, Shorts and
+Stories), 36 s: the narrated walkthrough, the bookofelyon.org card, then a fade
+into the CoraMar Holdings family page. `...-male-voice` versions use the male
+narrator. The `apple-app-preview` and `youtube-promo` files are the shorter
+29.5 s cuts made for the app stores (Apple's limit is 30 s).
+
 ## Soundtrack and narration
 
 The videos' music is an original piece made for this app (D Ahava Rabbah,
