@@ -10,7 +10,7 @@ app produces. Rebuild them after big design changes.
 |---|---|
 | `apple-iphone-6.9in/` (7 × 1320×2868) | **iPhone 6.9" Display**. Apple scales these down for smaller iPhones. |
 | `apple-ipad-13in/` (7 × 2064×2752) | **iPad 13" Display**. Required while the app supports iPad. |
-| `videos/apple-app-preview-iphone-886x1920.mp4` | **App Preview** for iPhone 6.9" (29.5 s, H.264, 30 fps). Optional, up to 3 per size. |
+| `videos/apple-app-preview-iphone-886x1920.mp4` | **App Preview** for iPhone 6.9" (29.5 s, H.264, 30 fps, AAC stereo). Optional, up to 3 per size. |
 
 The app icon (1024×1024) is already in the Xcode project (`ios/App/App/Assets.xcassets`).
 
@@ -35,3 +35,10 @@ The app icon (1024×1024) is already in the Xcode project (`ios/App/App/Assets.x
 7. 108 names of God
 
 The listing text (descriptions, keywords) is in `docs/APP-STORES.md`.
+
+## Soundtrack
+
+The videos' music is an original piece made for this app (D Ahava Rabbah,
+harp, flute, pads, with soft taps on each tap and keystroke), so there is no
+licence or credit to manage. Its source is a short script; ask for it to be
+rebuilt if the video changes.

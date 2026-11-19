@@ -1,7 +1,7 @@
 # Publishing The Book of Elyon on Google Play and the App Store
 
 The apps are [Capacitor](https://capacitorjs.com) shells around the live site
-(`capacitor.config.ts` points them at https://bookofelyon.org), the same way
+(`capacitor.config.json` points them at https://bookofelyon.org; it is JSON, not TypeScript, so any Node version works), the same way
 the Kingdom Building Study Bible works. Website updates reach the apps at
 once. Only native changes (name, icon, splash screen) need a new build.
 

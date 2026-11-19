@@ -1,0 +1,12 @@
+{
+  "appId": "org.bookofelyon.app",
+  "appName": "Book of Elyon",
+  "webDir": "app-shell",
+  "server": {
+    "url": "https://bookofelyon.org",
+    "cleartext": false
+  },
+  "backgroundColor": "#f7f3ec",
+  "android": { "backgroundColor": "#f7f3ec" },
+  "ios": { "backgroundColor": "#f7f3ec", "contentInset": "never" }
+}
