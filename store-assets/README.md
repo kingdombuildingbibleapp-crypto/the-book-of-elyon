@@ -52,4 +52,4 @@ required (voices: af_heart, female; am_michael, male). Script:
 > verse, and it is explained in plain words, with passages to read next. Ask
 > anything, about a verse, a book, or a word. Every answer points you back to
 > scripture. Each day brings a verse, a teaching, and worship sung in Hebrew.
-> Discover the names of God. The Book of Elyon.
+> Discover the names of God. The Book of Elyon, at bookofelyon.org.
