@@ -43,6 +43,7 @@ select,.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink
 .v sup{color:var(--accent);font:600 11px Inter,sans-serif;margin-right:4px}
 .pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:32px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
 .chnav{display:flex;justify-content:space-between;gap:12px;margin-top:36px}
+.chnav.top{margin:0 0 22px}
 .chbtn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;max-width:48%;padding:12px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);text-decoration:none;cursor:pointer;font:inherit;text-align:left}
 .chbtn.nx{align-items:flex-end;text-align:right;margin-left:auto}
 .chbtn:hover{border-color:var(--accent)}
@@ -376,6 +377,10 @@ async function open(id,tr,ch,verse){
   const chs=(x,tr)=>x.translations[tr]||Object.values(x.translations)[0];
   const prevT=cur.ch>1?{id,ch:cur.ch-1,name:b.name}:pb?{id:pb.id,ch:chs(pb,cur.tr),name:pb.name}:null;
   const nextT=cur.ch<n?{id,ch:cur.ch+1,name:b.name}:nb?{id:nb.id,ch:1,name:nb.name}:null;
+  const chnav=where=>`<div class="chnav ${where}" role="navigation" aria-label="Chapters">
+      ${prevT?`<button class="chbtn" data-go="prev"><span class="cd">‹ Previous</span><span class="ct">${esc(prevT.name)} ${prevT.ch}</span></button>`:`<a class="chbtn" href="#contents"><span class="cd">‹ Back</span><span class="ct">Contents</span></a>`}
+      ${nextT?`<button class="chbtn nx" data-go="next"><span class="cd">Next ›</span><span class="ct">${esc(nextT.name)} ${nextT.ch}</span></button>`:'<span></span>'}
+    </div>`;
   const altList=Object.entries(alts).sort((a,b)=>a[0]-b[0]).flatMap(([v,rs])=>rs.map(r=>[v,r]));
   $('#main').innerHTML=`
     <h2>${esc(b.name)}</h2>
@@ -386,13 +391,11 @@ async function open(id,tr,ch,verse){
       <select id="ch" aria-label="Chapter">${Array.from({length:n},(_,i)=>`<option${i+1===cur.ch?' selected':''}>${i+1}</option>`).join('')}</select>
       <button class="btn" id="next" ${cur.ch>=n?'disabled':''}>›</button>
     </div>
+    ${chnav("top")}
     ${cur.ch===1&&b.intro?`<div class="intro"><b>About this book</b>${esc(b.intro)}</div>`:''}
     <div class="text"><h3>Chapter ${cur.ch}</h3><p class="hint">Double-tap any verse for an explanation and related passages.</p>${verses.map((v,i)=>`<span class="v" id="v${i+1}" data-v="${i+1}"><sup>${i+1}</sup>${esc(v)}${alts[i+1]?`<a class="alt" href="javascript:void(0)" data-v="${i+1}" title="Alternate reading">†</a>`:''} </span>`).join('')}</div>
     ${altList.length?`<div class="alts"><h4>Alternate readings</h4>${altList.map(([v,r])=>`<p id="alt-${v}"><span class="vn">${cur.ch}:${v}</span>${esc(r)}</p>`).join('')}</div>`:''}
-    <div class="chnav" role="navigation" aria-label="Chapters">
-      ${prevT?`<button class="chbtn" id="prev2"><span class="cd">‹ Previous</span><span class="ct">${esc(prevT.name)} ${prevT.ch}</span></button>`:`<a class="chbtn" href="#contents"><span class="cd">‹ Back</span><span class="ct">Contents</span></a>`}
-      ${nextT?`<button class="chbtn nx" id="next2"><span class="cd">Next ›</span><span class="ct">${esc(nextT.name)} ${nextT.ch}</span></button>`:'<span></span>'}
-    </div>
+    ${chnav("bottom")}
     <div class="pager"><span>Page ${page} of ${IDX.pages}</span>
       <form id="go"><label>Go to page <input id="pg" type="number" min="1" max="${IDX.pages}" value="${page}"></label></form></div>
     <p class="note">${esc(t.name||cur.tr)} · ${esc(t.license||'')}${t.note?'<br>'+esc(t.note):''}</p>`;
@@ -400,8 +403,7 @@ async function open(id,tr,ch,verse){
   $('#ch').onchange=e=>open(id,cur.tr,+e.target.value);
   $('#prev').onclick=()=>open(id,cur.tr,cur.ch-1);
   $('#next').onclick=()=>open(id,cur.tr,cur.ch+1);
-  if(prevT) $('#prev2').onclick=()=>open(prevT.id,cur.tr,prevT.ch);
-  if(nextT) $('#next2').onclick=()=>open(nextT.id,cur.tr,nextT.ch);
+  document.querySelectorAll('.chnav [data-go]').forEach(btn=>btn.onclick=()=>{const t=btn.dataset.go==='prev'?prevT:nextT; open(t.id,cur.tr,t.ch);});
   document.querySelectorAll('.alt').forEach(a=>a.onclick=()=>{const t=document.getElementById('alt-'+a.dataset.v);t.scrollIntoView({behavior:'smooth',block:'center'});t.style.background='var(--accent-soft)';setTimeout(()=>t.style.background='',1500);});
   $('#go').onsubmit=e=>{e.preventDefault(); goPage(+$('#pg').value);};
   renderList($('#q').value); $('#nav').classList.remove('open'); scrollTo(0,0);
