@@ -10,7 +10,7 @@ app produces. Rebuild them after big design changes.
 |---|---|
 | `apple-iphone-6.9in/` (7 × 1320×2868) | **iPhone 6.9" Display**. Apple scales these down for smaller iPhones. |
 | `apple-ipad-13in/` (7 × 2064×2752) | **iPad 13" Display**. Required while the app supports iPad. |
-| `videos/apple-app-preview-iphone-886x1920.mp4` | **App Preview** for iPhone 6.9" (29.5 s, H.264, 30 fps, AAC stereo). Optional, up to 3 per size. |
+| `videos/apple-app-preview-iphone-886x1920.mp4` | **App Preview** for iPhone 6.9" (29.5 s, H.264, 30 fps, AAC stereo), narrated by a female voice. `...-male-voice.mp4` is the same with a male voice: use one. Optional, up to 3 per size. |
 
 The app icon (1024×1024) is already in the Xcode project (`ios/App/App/Assets.xcassets`).
 
@@ -22,7 +22,7 @@ The app icon (1024×1024) is already in the Xcode project (`ios/App/App/Assets.x
 | `google-play-graphics/feature-graphic-1024x500.png` | **Feature graphic** (required) |
 | `google-play-phone/` (7 × 1080×1920) | **Phone screenshots** (2 to 8) |
 | `google-play-tablet-10in/` (7 × 1600×2560) | **10-inch tablet screenshots** (optional). Can also be used for 7-inch tablets. |
-| `videos/youtube-promo-1920x1080.mp4` | Upload to YouTube (Public or Unlisted, ads off), then paste the YouTube link in **Video**. Google Play only accepts YouTube links. |
+| `videos/youtube-promo-1920x1080.mp4` (or `...-male-voice.mp4`) | Upload to YouTube (Public or Unlisted, ads off), then paste the YouTube link in **Video**. Google Play only accepts YouTube links. |
 
 ## Screenshot order and captions
 
@@ -36,9 +36,20 @@ The app icon (1024×1024) is already in the Xcode project (`ios/App/App/Assets.x
 
 The listing text (descriptions, keywords) is in `docs/APP-STORES.md`.
 
-## Soundtrack
+## Soundtrack and narration
 
 The videos' music is an original piece made for this app (D Ahava Rabbah,
 harp, flute, pads, with soft taps on each tap and keystroke), so there is no
 licence or credit to manage. Its source is a short script; ask for it to be
 rebuilt if the video changes.
+
+The narration is generated with Kokoro, an open text-to-speech model released
+under the Apache 2.0 licence, which allows commercial use with no credit
+required (voices: af_heart, female; am_michael, male). Script:
+
+> This is the Book of Elyon. Eighty-two books of scripture, in the order they
+> were written. *The Lord is my shepherd; I shall not want.* Double-tap any
+> verse, and it is explained in plain words, with passages to read next. Ask
+> anything, about a verse, a book, or a word. Every answer points you back to
+> scripture. Each day brings a verse, a teaching, and worship sung in Hebrew.
+> Discover the names of God. The Book of Elyon.
